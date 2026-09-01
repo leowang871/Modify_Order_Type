@@ -1,0 +1,1236 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>口袋證券 · 下單改類申請</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+:root {
+  --pkt-red-main: #E95465;
+  --pkt-red-hover: #D03B4C;
+  --pkt-red-deep: #E60039;
+  --pkt-member-bg: #FEEDED;
+  --pkt-pink-50: #FFF2F2;
+  --pkt-ink: #252525;
+  --pkt-gray-700: #3E3A39;
+  --pkt-gray-500: #717071;
+  --pkt-gray-300: #C8C9CA;
+  --pkt-gray-100: #EEEEEF;
+  --pkt-gray-50: #F5F5F5;
+  --pkt-white: #FFFFFF;
+  --pkt-shadow-card: 0 1px 5px 0 rgba(0, 0, 0, 0.05);
+  --pkt-shadow-lift: 3px 5px 10px 0 rgba(0, 0, 0, 0.10);
+  --pkt-shadow-header: 0 1px 1px 0 rgba(0, 0, 0, 0.25);
+  --pkt-r-md: 8px;
+  --pkt-r-lg: 10px;
+  --pkt-r-xl: 16px;
+  --pkt-r-pill: 100px;
+  --pkt-font-sans: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+  --pkt-font-latin: "Inter", "Noto Sans TC", sans-serif;
+  --content-max: 1200px;
+  --header-h: 72px;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: var(--pkt-font-sans);
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--pkt-ink);
+  background: var(--pkt-gray-50);
+  min-height: 100vh;
+}
+a { color: inherit; text-decoration: none; }
+button, input, select { font-family: inherit; }
+
+.pkt-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  height: var(--header-h);
+  background: var(--pkt-white);
+  box-shadow: var(--pkt-shadow-header);
+  display: flex;
+  align-items: center;
+  padding: 0 40px;
+}
+.pkt-brand { display: inline-flex; align-items: center; gap: 10px; }
+.pkt-shield { width: 40px; height: 40px; color: var(--pkt-red-deep); }
+.pkt-brand-text { font-weight: 700; font-size: 22px; letter-spacing: 0.04em; }
+
+.pkt-main {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: 28px 40px 80px;
+}
+
+.pkt-page-title {
+  margin: 0 0 16px;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--pkt-ink);
+}
+
+.pkt-panel {
+  background: var(--pkt-white);
+  border-radius: 0 0 var(--pkt-r-xl) var(--pkt-r-xl);
+  box-shadow: var(--pkt-shadow-card);
+  padding: 20px 28px 28px;
+}
+
+/* 分頁在灰底上，白卡從搜尋列開始 */
+.cr-tabs {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  border-bottom: none;
+}
+.cr-tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 108px;
+  height: 40px;
+  padding: 0 22px;
+  margin-bottom: -1px;
+  border: 1px solid var(--pkt-gray-100);
+  border-bottom: none;
+  border-radius: 10px 10px 0 0;
+  background: #FAFAFA;
+  color: var(--pkt-gray-500);
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.cr-tab.is-active {
+  background: var(--pkt-red-main);
+  border-color: var(--pkt-red-main);
+  color: #fff;
+}
+
+.cr-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+.cr-field-label {
+  flex: 0 0 auto;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--pkt-ink);
+  white-space: nowrap;
+}
+.cr-account {
+  flex: 0 1 280px;
+  min-width: 240px;
+  height: 40px;
+  padding: 0 14px;
+  border: 1px solid #000;
+  border-radius: 6px;
+  font-size: 16px;
+  color: var(--pkt-ink);
+  background: #FAFAFA;
+  cursor: default;
+}
+.cr-search {
+  position: relative;
+  flex: 0 0 220px;
+}
+.cr-search input {
+  width: 100%;
+  height: 40px;
+  padding: 0 14px 0 38px;
+  border: 1px solid var(--pkt-gray-300);
+  border-radius: 6px;
+  font-size: 15px;
+  background: #fff;
+}
+.cr-search input:focus {
+  outline: none;
+  border-color: var(--pkt-red-main);
+}
+.cr-search svg {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  color: var(--pkt-gray-500);
+  pointer-events: none;
+}
+.cr-btn-search {
+  height: 40px;
+  min-width: 88px;
+  padding: 0 20px;
+  border: none;
+  border-radius: 8px;
+  background: var(--pkt-red-main);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.cr-btn-search:hover { background: var(--pkt-red-hover); }
+
+.cr-table-wrap { width: 100%; overflow: auto; }
+
+.cr-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 16px;
+}
+.cr-table thead th {
+  padding: 12px 16px;
+  background: var(--pkt-member-bg);
+  font-weight: 600;
+  text-align: left;
+  white-space: nowrap;
+}
+.cr-table thead th:first-child { border-radius: 8px 0 0 8px; }
+.cr-table thead th:last-child { border-radius: 0 8px 8px 0; }
+.cr-sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  background: transparent;
+  padding: 0;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  color: inherit;
+}
+.cr-sort__arrows {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0;
+  line-height: 1;
+  font-size: 9px;
+  color: #C0C0C0;
+}
+.cr-sort__arrows .is-on { color: var(--pkt-red-main); }
+
+.cr-view { display: none; }
+.cr-view.is-on { display: block; }
+.cr-tabs[hidden] { display: none; }
+
+#view-apply .cr-table thead th:nth-child(3),
+#view-apply .cr-table thead th:nth-child(5),
+#view-apply .cr-table tbody td:nth-child(3),
+#view-apply .cr-table tbody td:nth-child(5) {
+  text-align: center;
+}
+#view-apply .cr-table thead th:nth-child(3) .cr-sort {
+  justify-content: center;
+  width: 100%;
+}
+
+#view-records .cr-table thead th,
+#view-records .cr-table tbody td { text-align: center; }
+#view-records .cr-sort { justify-content: center; width: 100%; }
+
+.cr-status {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 100px;
+  font-size: 14px;
+  font-weight: 600;
+}
+.cr-status--applied { background: #FFF4E5; color: #B86E00; }
+.cr-status--approved { background: #E8F6EE; color: #1B7A3A; }
+.cr-status--source { background: var(--pkt-pink-50); color: var(--pkt-red-main); }
+
+#view-empty .pkt-panel {
+  border-radius: var(--pkt-r-xl);
+  padding: 80px 40px;
+  min-height: 280px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.cr-empty-msg {
+  margin: 0;
+  max-width: 640px;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.75;
+  text-align: center;
+  color: var(--pkt-ink);
+}
+.cr-empty-msg a {
+  color: var(--pkt-ink);
+  font-weight: 700;
+  text-decoration: underline;
+  white-space: nowrap;
+}
+.cr-table tbody td {
+  padding: 16px;
+  border-bottom: 1px solid var(--pkt-gray-100);
+  font-variant-numeric: tabular-nums;
+  font-family: var(--pkt-font-latin), var(--pkt-font-sans);
+}
+.cr-table tbody tr.cr-row:nth-child(odd) td { background: #fff; }
+.cr-table tbody tr.cr-row:nth-child(even) td { background: #FAFAFA; }
+.cr-table tbody tr.cr-row.is-selected td { background: var(--pkt-pink-50); }
+
+.cr-name-cell {
+  font-family: var(--pkt-font-sans);
+}
+.cr-est {
+  white-space: nowrap;
+}
+.cr-num-red { color: var(--pkt-red-main); font-weight: 700; }
+.cr-num-warn { color: var(--pkt-red-deep); font-weight: 700; }
+.cr-table tfoot tr.is-over td { background: #FFE8E8; }
+.pkt-panel.is-locked .cr-table-wrap,
+.pkt-panel.is-locked .cr-toolbar,
+.pkt-panel.is-locked .cr-footer {
+  pointer-events: none;
+  opacity: 0.45;
+}
+.cr-btn-search:disabled { opacity: 0.45; cursor: not-allowed; }
+.cr-table tfoot td {
+  padding: 14px 16px;
+  background: var(--pkt-pink-50);
+  border-top: 1px solid var(--pkt-gray-100);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  font-family: var(--pkt-font-sans);
+  text-align: right;
+}
+
+.cr-stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 148px;
+}
+.cr-stepper__btn {
+  width: auto;
+  min-width: 28px;
+  height: 36px;
+  padding: 0 2px;
+  border: none;
+  background: transparent;
+  font-size: 22px;
+  line-height: 1;
+  font-weight: 400;
+  color: #6B6B6B;
+  cursor: pointer;
+}
+.cr-stepper__btn:hover:not(:disabled) { color: var(--pkt-red-main); }
+.cr-stepper__btn:disabled { opacity: 0.35; cursor: not-allowed; }
+.cr-stepper__field {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 92px;
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--pkt-gray-300);
+  border-radius: 12px;
+  background: #fff;
+}
+.cr-stepper__field:focus-within {
+  border-color: var(--pkt-red-main);
+}
+.cr-stepper__input {
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  outline: none;
+  font-family: var(--pkt-font-latin), var(--pkt-font-sans);
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--pkt-ink);
+  text-align: left;
+}
+.cr-stepper__unit {
+  flex: 0 0 auto;
+  margin-left: 6px;
+  color: var(--pkt-ink);
+  font-family: var(--pkt-font-sans);
+  font-size: 16px;
+}
+
+.cr-empty {
+  padding: 48px 16px;
+  text-align: center;
+  color: var(--pkt-gray-500);
+}
+
+.cr-footer {
+  display: flex;
+  justify-content: center;
+  margin-top: 28px;
+}
+.cr-btn-next {
+  min-width: 240px;
+  height: 44px;
+  border: none;
+  border-radius: var(--pkt-r-pill);
+  background: var(--pkt-red-main);
+  color: #fff;
+  font-size: 17px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.cr-btn-next:hover { background: var(--pkt-red-hover); }
+.cr-btn-next:disabled {
+  background: var(--pkt-gray-300);
+  cursor: not-allowed;
+}
+
+.pkt-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.pkt-modal.is-open { display: flex; }
+.pkt-modal__backdrop {
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,.45); border: 0; cursor: default;
+}
+.pkt-modal__dialog {
+  position: relative;
+  width: min(720px, calc(100vw - 32px));
+  background: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0,0,0,.18);
+}
+.pkt-modal__title {
+  margin: 0;
+  padding: 14px 18px;
+  background: #f8cdd1;
+  font-size: 18px;
+  font-weight: 700;
+  text-align: center;
+}
+.pkt-modal__body { padding: 16px 18px 12px; }
+.pkt-modal--notice.is-open {
+  align-items: flex-start;
+  padding-top: 328px;
+}
+.pkt-modal--notice .pkt-modal__backdrop {
+  background: transparent;
+  cursor: default;
+}
+.pkt-modal--notice .pkt-modal__dialog {
+  width: min(560px, calc(100vw - 32px));
+  border-radius: 10px;
+}
+.pkt-modal--notice .pkt-modal__title {
+  padding: 16px 40px;
+  background: var(--pkt-member-bg);
+  border-bottom: 1px solid rgba(233, 84, 101, 0.18);
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.5;
+  text-align: center;
+}
+.pkt-modal--notice .pkt-modal__body {
+  padding: 24px 40px;
+  text-align: center;
+}
+.pkt-modal--notice .pkt-modal__notice {
+  margin: 0 0 16px;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.75;
+  text-align: center;
+  color: var(--pkt-ink);
+}
+.pkt-modal--notice .pkt-modal__notice:last-child { margin-bottom: 0; }
+.pkt-modal--notice .pkt-modal__actions {
+  gap: 12px;
+  padding: 0 40px 24px;
+}
+.pkt-modal--notice .pkt-modal__btn {
+  height: 44px;
+  border-radius: 8px;
+  font-size: 16px;
+}
+.pkt-modal--notice .pkt-modal__btn--cancel:hover { background: var(--pkt-pink-50); }
+.pkt-modal--notice .pkt-modal__btn--submit:hover { background: var(--pkt-red-hover); }
+.pkt-modal--notice.is-single .pkt-modal__btn--cancel { display: none; }
+.pkt-modal--notice.is-single .pkt-modal__actions {
+  justify-content: center;
+}
+.pkt-modal--notice.is-single .pkt-modal__btn--submit {
+  flex: 0 0 auto;
+  min-width: 120px;
+  width: 120px;
+  height: 40px;
+  font-size: 15px;
+}
+.pkt-modal__warning {
+  margin: 0 0 12px;
+  color: var(--pkt-red-main);
+  font-size: 14px;
+  font-weight: 700;
+  text-align: center;
+}
+.pkt-modal__actions {
+  display: flex; gap: 12px; padding: 8px 18px 18px;
+}
+.pkt-modal__btn {
+  flex: 1; height: 42px; border-radius: 8px; font-size: 16px; font-weight: 500; cursor: pointer;
+}
+.pkt-modal__btn--cancel {
+  border: 1px solid var(--pkt-red-main); background: #fff; color: var(--pkt-red-main);
+}
+.pkt-modal__btn--submit {
+  border: 0; background: var(--pkt-red-main); color: #fff;
+}
+
+.cr-summary {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.cr-summary th {
+  background: var(--pkt-member-bg);
+  padding: 10px;
+  text-align: center;
+}
+.cr-summary td { padding: 10px; text-align: center; border-bottom: 1px solid var(--pkt-gray-100); }
+.cr-summary tfoot td {
+  padding: 12px 10px;
+  text-align: right;
+  font-weight: 600;
+  border-bottom: none;
+  background: var(--pkt-pink-50);
+}
+
+.pkt-toast {
+  display: none;
+  position: fixed;
+  top: 88px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 210;
+  padding: 12px 24px;
+  background: var(--pkt-ink);
+  color: #fff;
+  border-radius: 8px;
+}
+.pkt-toast.is-visible { display: block; }
+
+.pkt-mobile-menu, .pkt-mobile-logout { display: none; }
+
+@media (max-width: 900px) {
+  .pkt-header { padding: 0 16px; }
+  .pkt-main { padding: 20px 16px 64px; }
+  .pkt-panel { padding: 16px 16px 20px; }
+  .cr-toolbar { flex-wrap: wrap; }
+  .pkt-modal--notice.is-open { padding-top: 360px; }
+}
+@media (max-width: 560px) {
+  .pkt-header { height: 56px; justify-content: center; }
+  .pkt-brand-text { font-size: 18px; }
+  .pkt-shield { width: 27px; height: 27px; }
+  .pkt-mobile-menu, .pkt-mobile-logout {
+    display: inline-flex; position: absolute; top: 50%; transform: translateY(-50%);
+    height: 34px; align-items: center; justify-content: center; background: #fff;
+  }
+  .pkt-mobile-menu { left: 12px; width: 34px; border: 0; font-size: 20px; }
+  .pkt-mobile-logout {
+    right: 12px; min-width: 56px; padding: 0 12px;
+    border: 1px solid var(--pkt-red-main); border-radius: 7px; color: var(--pkt-red-main);
+  }
+  .pkt-page-title { font-size: 18px; }
+  .cr-btn-next { width: 100%; }
+  #view-empty .pkt-panel { padding: 48px 20px; }
+}
+  </style>
+</head>
+<body>
+  <header class="pkt-header">
+    <button type="button" class="pkt-mobile-menu" aria-label="開啟選單">☰</button>
+    <a href="#" class="pkt-brand" aria-label="口袋證券">
+      <svg class="pkt-shield" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path fill="currentColor" d="M30.64.06c-.18-.03-.51-.08-.88-.05a4.93 4.93 0 0 0-4.7 4.92v10.07c0 .51-.04 1.02-.11 1.52A9.4 9.4 0 0 1 22.55 21.66c-.22.25-.46.5-.77.78a9.7 9.7 0 0 1-1.77 1.3 10.9 10.9 0 0 1-5 1.34h-.1a10.8 10.8 0 0 1-3.82-.79c-.39-.16-.77-.35-1.12-.55a9.6 9.6 0 0 1-1.24-.85 9.6 9.6 0 0 1-1.3-1.23 9.7 9.7 0 0 1-2.51-6.66V8.13a3.2 3.2 0 0 1 3.16-3.21h17.03V3.19A3.2 3.2 0 0 0 21.92 0H6.38C6.05 0 5.74.02 5.42.07A6.4 6.4 0 0 0 .07 5.42 6.4 6.4 0 0 0 0 6.38v8.66c0 3.62 1.29 6.95 3.43 9.54a14.2 14.2 0 0 0 1.99 2 14 14 0 0 0 .92.76c.04.03.08.06.12.08.26.19.53.36.8.52l.16.1c.27.16.55.32.84.47l.13.06a15.2 15.2 0 0 0 7.57 1.42 14.6 14.6 0 0 0 13.74-12.04V2.94S29.89.93 30.65.1c.02-.01.02-.04 0-.05Z"/>
+      </svg>
+      <span class="pkt-brand-text">口袋證券</span>
+    </a>
+    <button type="button" class="pkt-mobile-logout">登出</button>
+  </header>
+
+  <main class="pkt-main">
+    <h1 class="pkt-page-title">下單改類申請</h1>
+
+    <div class="cr-tabs" id="cr-tabs" role="tablist">
+      <a class="cr-tab is-active" id="tab-apply" href="#apply">改類申請</a>
+      <a class="cr-tab" id="tab-records" href="#records">申請紀錄</a>
+    </div>
+
+    <div class="cr-view is-on" id="view-apply">
+      <div class="pkt-panel" id="apply-panel">
+        <form class="cr-toolbar" id="query-form">
+          <span class="cr-field-label">證券帳號</span>
+          <input class="cr-account" value="陳小傑 6620-0385361" aria-label="證券帳號" readonly tabindex="-1" />
+          <div class="cr-search">
+            <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="7" cy="7" r="5.25" stroke="currentColor" stroke-width="1.5"/><path d="M11 11l3.2 3.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            <input type="search" id="stock-query" placeholder="輸入股票代號" />
+          </div>
+          <button type="submit" class="cr-btn-search" id="btn-search">搜尋</button>
+        </form>
+
+        <div class="cr-table-wrap">
+          <table class="cr-table">
+            <thead id="thead">
+              <tr>
+                <th><button type="button" class="cr-sort" data-sort="name">股票名稱 <span class="cr-sort__arrows"><span data-dir="asc">▲</span><span data-dir="desc">▼</span></span></button></th>
+                <th><button type="button" class="cr-sort" data-sort="price">單價 <span class="cr-sort__arrows"><span data-dir="asc">▲</span><span data-dir="desc">▼</span></span></button></th>
+                <th><button type="button" class="cr-sort" data-sort="lots">可改類張數 <span class="cr-sort__arrows"><span data-dir="asc">▲</span><span data-dir="desc">▼</span></span></button></th>
+                <th>改資買張數</th>
+                <th>預估融資金額</th>
+              </tr>
+            </thead>
+            <tbody id="tbody"></tbody>
+            <tfoot id="tfoot"></tfoot>
+          </table>
+        </div>
+
+        <div class="cr-footer">
+          <button type="button" class="cr-btn-next" id="btn-next" disabled>下一步：送出</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="cr-view" id="view-records">
+      <div class="pkt-panel">
+        <form class="cr-toolbar" id="records-form">
+          <span class="cr-field-label">證券帳號</span>
+          <input class="cr-account" value="陳小傑 6620-0385361" aria-label="證券帳號" readonly tabindex="-1" />
+          <div class="cr-search">
+            <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="7" cy="7" r="5.25" stroke="currentColor" stroke-width="1.5"/><path d="M11 11l3.2 3.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            <input type="search" id="records-query" placeholder="輸入股票代號" />
+          </div>
+          <button type="submit" class="cr-btn-search">搜尋</button>
+        </form>
+        <div class="cr-table-wrap">
+          <table class="cr-table">
+            <thead id="records-thead">
+              <tr>
+                <th><button type="button" class="cr-sort" data-sort="date">申請日期 <span class="cr-sort__arrows"><span data-dir="asc">▲</span><span data-dir="desc">▼</span></span></button></th>
+                <th><button type="button" class="cr-sort" data-sort="name">股票名稱 <span class="cr-sort__arrows"><span data-dir="asc">▲</span><span data-dir="desc">▼</span></span></button></th>
+                <th><button type="button" class="cr-sort" data-sort="price">單價 <span class="cr-sort__arrows"><span data-dir="asc">▲</span><span data-dir="desc">▼</span></span></button></th>
+                <th><button type="button" class="cr-sort" data-sort="lots">可改類張數 <span class="cr-sort__arrows"><span data-dir="asc">▲</span><span data-dir="desc">▼</span></span></button></th>
+                <th>改資買張數</th>
+                <th><button type="button" class="cr-sort" data-sort="status">狀態 <span class="cr-sort__arrows"><span data-dir="asc">▲</span><span data-dir="desc">▼</span></span></button></th>
+              </tr>
+            </thead>
+            <tbody id="records-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="cr-view" id="view-empty">
+      <div class="pkt-panel">
+        <p class="cr-empty-msg">您今日無下單紀錄或超過可改類時間，若有需求，請於服務時間聯絡客服：<a href="tel:0809-089-001">0809-089-001</a></p>
+      </div>
+    </div>
+  </main>
+
+  <div class="pkt-modal pkt-modal--notice" id="notice-modal" aria-hidden="true">
+    <button type="button" class="pkt-modal__backdrop" id="notice-backdrop" tabindex="-1" aria-hidden="true"></button>
+    <div class="pkt-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="notice-title">
+      <p class="pkt-modal__title" id="notice-title">提示</p>
+      <div class="pkt-modal__body" id="notice-body"></div>
+      <div class="pkt-modal__actions">
+        <button type="button" class="pkt-modal__btn pkt-modal__btn--cancel" id="notice-cancel">取消</button>
+        <button type="button" class="pkt-modal__btn pkt-modal__btn--submit" id="notice-ok">前往變更</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="pkt-modal" id="confirm-modal" aria-hidden="true">
+    <button type="button" class="pkt-modal__backdrop" id="confirm-backdrop" tabindex="-1" aria-hidden="true"></button>
+    <div class="pkt-modal__dialog" role="dialog" aria-modal="true">
+      <p class="pkt-modal__title">確認改類</p>
+      <div class="pkt-modal__body">
+        <p class="pkt-modal__warning">送出後不可更改，請確認改資買張數與金額無誤後再送出。</p>
+        <table class="cr-summary">
+          <thead>
+            <tr>
+              <th>股票名稱</th>
+              <th>可改類張數</th>
+              <th>改資買張數</th>
+              <th>預估融資金額</th>
+            </tr>
+          </thead>
+          <tbody id="confirm-body"></tbody>
+          <tfoot>
+            <tr>
+              <td colspan="4" id="confirm-total"></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      <div class="pkt-modal__actions">
+        <button type="button" class="pkt-modal__btn pkt-modal__btn--cancel" id="confirm-cancel">取消</button>
+        <button type="button" class="pkt-modal__btn pkt-modal__btn--submit" id="confirm-submit">送出申請</button>
+      </div>
+    </div>
+  </div>
+  <div class="pkt-toast" id="toast">改類申請已送出</div>
+
+  <script>
+(function () {
+  var STORAGE_KEY = 'pkt-reclass-records-v3';
+  var SEED_RECORDS = [
+    { id: 'R1', date: '2026/08/27', code: '2330',  name: '台積電',         price: 1085,  lots: 2, convert: 1, status: 'applied' },
+    { id: 'R2', date: '2026/08/26', code: '00712', name: '復華富時不動產', price: 22.15, lots: 5, convert: 3, status: 'source' },
+    { id: 'R3', date: '2026/08/25', code: '2317',  name: '鴻海',           price: 214.5, lots: 12, convert: 4, status: 'approved' }
+  ];
+  var APPLY_ROWS = [
+    { id: 'M1', code: '00712', name: '復華富時不動產', lots: 5,  price: 22.15 },
+    { id: 'M2', code: '00687B', name: '國泰20年美債',   lots: 10, price: 32.08 },
+    { id: 'M3', code: '00712', name: '復華富時不動產', lots: 8,  price: 21.90 },
+    { id: 'M4', code: '00687B', name: '國泰20年美債',   lots: 3,  price: 31.96 },
+    { id: 'M5', code: '2330',  name: '台積電',         lots: 2,  price: 1085 },
+    { id: 'M6', code: '2317',  name: '鴻海',           lots: 12, price: 214.5 }
+  ];
+
+  var keyword = '';
+  var sortKey = 'name';
+  var sortDir = 'asc';
+  var convertQty = {};
+  var pageLocked = false;
+  var submitting = false;
+  var CLIENT_MARGIN_LIMIT = 2000000;
+  var SHARES_PER_LOT = 1000;
+  var CREDIT_OPEN_URL = '#';
+  var QUOTA_APPLY_URL = '#';
+  var PORTAL_URL = 'https://www.pocket.tw/';
+  var MARGIN_BALANCE = (function () {
+    var q = new URLSearchParams(window.location.search).get('balance');
+    var n = q == null || q === '' ? 12800 : Number(q);
+    return isNaN(n) ? 12800 : n;
+  })();
+  var NOTICE_TYPES = ['credit', 'quota', 'convert'];
+  var NOTICE_TYPE = (function () {
+    var q = new URLSearchParams(window.location.search).get('notice');
+    if (NOTICE_TYPES.indexOf(q) !== -1) return q;
+    return NOTICE_TYPES[Math.floor(Math.random() * NOTICE_TYPES.length)];
+  })();
+  var activeNotice = NOTICE_TYPE;
+
+  var recKeyword = '';
+  var recSortKey = 'date';
+  var recSortDir = 'desc';
+  var STATUS = { applied: '審核中', approved: '已通過', source: '券源不足' };
+  var STATUS_CLASS = { applied: 'cr-status--applied', approved: 'cr-status--approved', source: 'cr-status--source' };
+  var recThead = document.getElementById('records-thead');
+  var recTbody = document.getElementById('records-tbody');
+  var viewApply = document.getElementById('view-apply');
+  var viewRecords = document.getElementById('view-records');
+  var viewEmpty = document.getElementById('view-empty');
+  var crTabs = document.getElementById('cr-tabs');
+  var tabApply = document.getElementById('tab-apply');
+  var tabRecords = document.getElementById('tab-records');
+  var entryNoticeOpened = false;
+  var tbody = document.getElementById('tbody');
+  var tfoot = document.getElementById('tfoot');
+  var thead = document.getElementById('thead');
+  var btnNext = document.getElementById('btn-next');
+  var notice = document.getElementById('notice-modal');
+  var noticeBody = document.getElementById('notice-body');
+  var noticeOk = document.getElementById('notice-ok');
+  var noticeCancel = document.getElementById('notice-cancel');
+  var noticeTitle = document.getElementById('notice-title');
+  var applyPanel = document.getElementById('apply-panel');
+  var stockQuery = document.getElementById('stock-query');
+  var btnSearch = document.getElementById('btn-search');
+  var modal = document.getElementById('confirm-modal');
+  var confirmBody = document.getElementById('confirm-body');
+  var toast = document.getElementById('toast');
+
+  function formatPrice(n) {
+    return Number(n).toLocaleString('zh-TW', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+  function formatMoney(n) {
+    return Number(n).toLocaleString('zh-TW');
+  }
+  function estimateAmount(r) {
+    return r.price * getQty(r.id) * SHARES_PER_LOT;
+  }
+  function totalEstimate() {
+    var sum = 0;
+    APPLY_ROWS.forEach(function (r) { sum += estimateAmount(r); });
+    return sum;
+  }
+  function findRow(id) {
+    for (var i = 0; i < APPLY_ROWS.length; i++) {
+      if (APPLY_ROWS[i].id === id) return APPLY_ROWS[i];
+    }
+    return null;
+  }
+  function remainingQuota() {
+    return CLIENT_MARGIN_LIMIT - Math.round(totalEstimate());
+  }
+  function renderTotals() {
+    var total = Math.round(totalEstimate());
+    var remain = remainingQuota();
+    var remainClass = remain < 0 ? 'cr-num-warn' : 'cr-num-red';
+    tfoot.innerHTML =
+      '<tr' + (remain < 0 ? ' class="is-over"' : '') + '><td colspan="5">本次預估融資 <span class="cr-num-red">' + formatMoney(total) +
+      '</span> 元，申請後剩餘額度 <span class="' + remainClass + '">' + formatMoney(remain) +
+      '</span> 元</td></tr>';
+  }
+  function applyPageLock() {
+    applyPanel.classList.toggle('is-locked', pageLocked);
+    stockQuery.disabled = pageLocked;
+    btnSearch.disabled = pageLocked;
+    render();
+  }
+  function lockAfterBlockingNotice() {
+    if (activeNotice !== 'credit' && activeNotice !== 'quota') return;
+    pageLocked = true;
+    applyPageLock();
+  }
+  function getQty(id) {
+    return convertQty[id] == null ? 0 : convertQty[id];
+  }
+  function clampQty(id, value, max) {
+    var n = parseInt(String(value).replace(/[^\d]/g, ''), 10);
+    if (isNaN(n) || n < 0) n = 0;
+    if (n > max) n = max;
+    convertQty[id] = n;
+    return n;
+  }
+  function matchKeyword(r) {
+    if (!keyword) return true;
+    var q = keyword.toLowerCase();
+    return r.code.toLowerCase().indexOf(q) !== -1 || r.name.indexOf(keyword) !== -1;
+  }
+  function currentRows() {
+    var list = APPLY_ROWS.filter(matchKeyword);
+    list.sort(function (a, b) {
+      var cmp;
+      if (sortKey === 'name') cmp = (a.code + a.name).localeCompare(b.code + b.name, 'zh-Hant');
+      else cmp = a[sortKey] - b[sortKey];
+      return sortDir === 'asc' ? cmp : -cmp;
+    });
+    return list;
+  }
+  function readyItems() {
+    return APPLY_ROWS.filter(function (r) { return getQty(r.id) > 0; });
+  }
+  function syncNext() {
+    btnNext.disabled = pageLocked || submitting || readyItems().length === 0;
+  }
+  function normalizeRecordStatus(status) {
+    if (status === 'applied' || status === 'approved' || status === 'source') return status;
+    if (status === 'quota' || status === 'other') return 'source';
+    return 'applied';
+  }
+  function loadRecords() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        return JSON.parse(raw).map(function (r) {
+          r.status = normalizeRecordStatus(r.status);
+          return r;
+        });
+      }
+    } catch (e) {}
+    return SEED_RECORDS.slice();
+  }
+  function saveRecords(list) {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(list)); } catch (e) {}
+  }
+  function recCurrentRows() {
+    var list = loadRecords().filter(function (r) {
+      return !recKeyword ||
+        r.code.toLowerCase().indexOf(recKeyword.toLowerCase()) !== -1 ||
+        r.name.indexOf(recKeyword) !== -1;
+    });
+    list.sort(function (a, b) {
+      var cmp;
+      if (recSortKey === 'name') cmp = (a.code + a.name).localeCompare(b.code + b.name, 'zh-Hant');
+      else if (recSortKey === 'date' || recSortKey === 'status') cmp = String(a[recSortKey]).localeCompare(String(b[recSortKey]), 'zh-Hant');
+      else cmp = a[recSortKey] - b[recSortKey];
+      return recSortDir === 'asc' ? cmp : -cmp;
+    });
+    return list;
+  }
+  function renderRecords() {
+    recThead.querySelectorAll('.cr-sort').forEach(function (btn) {
+      var key = btn.getAttribute('data-sort');
+      btn.querySelectorAll('[data-dir]').forEach(function (arrow) {
+        arrow.classList.toggle('is-on', key === recSortKey && arrow.getAttribute('data-dir') === recSortDir);
+      });
+    });
+    var rows = recCurrentRows();
+    if (!rows.length) {
+      recTbody.innerHTML = '<tr><td class="cr-empty" colspan="6">尚無申請紀錄</td></tr>';
+      return;
+    }
+    recTbody.innerHTML = rows.map(function (r) {
+      return (
+        '<tr class="cr-row">' +
+          '<td>' + r.date + '</td>' +
+          '<td class="cr-name-cell">' + r.code + ' ' + r.name + '</td>' +
+          '<td>' + formatPrice(r.price) + '</td>' +
+          '<td>' + r.lots.toLocaleString('zh-TW') + '</td>' +
+          '<td>' + (r.convert == null ? 0 : r.convert).toLocaleString('zh-TW') + '</td>' +
+          '<td><span class="cr-status ' + (STATUS_CLASS[r.status] || STATUS_CLASS.applied) + '">' + (STATUS[r.status] || STATUS.applied) + '</span></td>' +
+        '</tr>'
+      );
+    }).join('');
+  }
+  function parseView() {
+    var h = (window.location.hash || '').replace('#', '');
+    if (h === 'apply' || h === 'records' || h === 'empty') return h;
+    var q = new URLSearchParams(window.location.search).get('view');
+    if (q === 'empty' || q === 'records' || q === 'apply') return q;
+    return 'apply';
+  }
+  function showView(name) {
+    viewApply.classList.toggle('is-on', name === 'apply');
+    viewRecords.classList.toggle('is-on', name === 'records');
+    viewEmpty.classList.toggle('is-on', name === 'empty');
+    crTabs.hidden = name === 'empty';
+    tabApply.classList.toggle('is-active', name === 'apply');
+    tabRecords.classList.toggle('is-active', name === 'records');
+    tabApply.setAttribute('aria-current', name === 'apply' ? 'page' : '');
+    tabRecords.setAttribute('aria-current', name === 'records' ? 'page' : '');
+    if (name !== 'apply') {
+      closeModal();
+      if (notice.classList.contains('is-open') && !isBlockingNotice()) closeNotice();
+    }
+    if (name === 'records') renderRecords();
+    if (name === 'apply' && !entryNoticeOpened) {
+      entryNoticeOpened = true;
+      openEntryNotice();
+    }
+  }
+
+  function stepperHtml(r) {
+    var qty = getQty(r.id);
+    var disabled = pageLocked ? 'disabled' : '';
+    var decOff = pageLocked || qty <= 0 ? 'disabled' : '';
+    var incOff = pageLocked || qty >= r.lots ? 'disabled' : '';
+    return (
+      '<div class="cr-stepper" data-stepper="' + r.id + '" data-max="' + r.lots + '">' +
+        '<button type="button" class="cr-stepper__btn" data-step="-1" ' + decOff + ' aria-label="減少 1 張">−</button>' +
+        '<span class="cr-stepper__field">' +
+          '<input type="text" inputmode="numeric" class="cr-stepper__input" value="' + qty + '" ' + disabled + ' aria-label="改資買張數" />' +
+          '<span class="cr-stepper__unit">張</span>' +
+        '</span>' +
+        '<button type="button" class="cr-stepper__btn" data-step="1" ' + incOff + ' aria-label="增加 1 張">+</button>' +
+      '</div>'
+    );
+  }
+
+  function render() {
+    thead.querySelectorAll('.cr-sort').forEach(function (btn) {
+      var key = btn.getAttribute('data-sort');
+      btn.querySelectorAll('[data-dir]').forEach(function (arrow) {
+        arrow.classList.toggle('is-on', key === sortKey && arrow.getAttribute('data-dir') === sortDir);
+      });
+    });
+    var rows = currentRows();
+    if (!rows.length) {
+      tbody.innerHTML = '<tr><td class="cr-empty" colspan="5">查無符合的資料</td></tr>';
+      renderTotals();
+      syncNext();
+      return;
+    }
+    tbody.innerHTML = rows.map(function (r) {
+      var qty = getQty(r.id);
+      return (
+        '<tr class="cr-row' + (qty > 0 ? ' is-selected' : '') + '" data-id="' + r.id + '">' +
+          '<td class="cr-name-cell">' + r.code + ' ' + r.name + '</td>' +
+          '<td>' + formatPrice(r.price) + '</td>' +
+          '<td>' + r.lots.toLocaleString('zh-TW') + '</td>' +
+          '<td>' + stepperHtml(r) + '</td>' +
+          '<td class="cr-est" data-est="' + r.id + '">' + formatMoney(Math.round(estimateAmount(r))) + '</td>' +
+        '</tr>'
+      );
+    }).join('');
+    renderTotals();
+    syncNext();
+  }
+
+  function updateStepper(wrap) {
+    if (pageLocked) return;
+    var id = wrap.getAttribute('data-stepper');
+    var max = parseInt(wrap.getAttribute('data-max'), 10);
+    var qty = clampQty(id, wrap.querySelector('.cr-stepper__input').value, max);
+    wrap.querySelector('.cr-stepper__input').value = String(qty);
+    wrap.querySelector('[data-step="-1"]').disabled = pageLocked || qty <= 0;
+    wrap.querySelector('[data-step="1"]').disabled = pageLocked || qty >= max;
+    wrap.closest('tr').classList.toggle('is-selected', qty > 0);
+    var row = findRow(id);
+    var est = wrap.closest('tr').querySelector('[data-est]');
+    if (row && est) est.textContent = formatMoney(Math.round(estimateAmount(row)));
+    renderTotals();
+    syncNext();
+  }
+
+  tbody.addEventListener('input', function (e) {
+    if (pageLocked) return;
+    var wrap = e.target.closest('[data-stepper]');
+    if (wrap) updateStepper(wrap);
+  });
+  tbody.addEventListener('change', function (e) {
+    if (pageLocked) return;
+    var wrap = e.target.closest('[data-stepper]');
+    if (wrap) updateStepper(wrap);
+  });
+  tbody.addEventListener('click', function (e) {
+    if (pageLocked) return;
+    var btn = e.target.closest('[data-step]');
+    if (!btn || btn.disabled) return;
+    var wrap = btn.closest('[data-stepper]');
+    var input = wrap.querySelector('.cr-stepper__input');
+    var max = parseInt(wrap.getAttribute('data-max'), 10);
+    var id = wrap.getAttribute('data-stepper');
+    clampQty(id, getQty(id) + parseInt(btn.getAttribute('data-step'), 10), max);
+    input.value = String(getQty(id));
+    updateStepper(wrap);
+  });
+
+  thead.addEventListener('click', function (e) {
+    if (pageLocked) return;
+    var btn = e.target.closest('.cr-sort');
+    if (!btn) return;
+    var key = btn.getAttribute('data-sort');
+    if (sortKey === key) sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+    else { sortKey = key; sortDir = 'asc'; }
+    render();
+  });
+
+  recThead.addEventListener('click', function (e) {
+    var btn = e.target.closest('.cr-sort');
+    if (!btn) return;
+    var key = btn.getAttribute('data-sort');
+    if (recSortKey === key) recSortDir = recSortDir === 'asc' ? 'desc' : 'asc';
+    else { recSortKey = key; recSortDir = 'asc'; }
+    renderRecords();
+  });
+  document.getElementById('records-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    recKeyword = document.getElementById('records-query').value.trim();
+    renderRecords();
+  });
+  window.addEventListener('hashchange', function () {
+    showView(parseView());
+  });
+  document.getElementById('query-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (pageLocked) return;
+    keyword = document.getElementById('stock-query').value.trim();
+    render();
+  });
+
+  function openModal() {
+    if (pageLocked) return;
+    var items = readyItems();
+    if (!items.length) return;
+    if (remainingQuota() < 0) {
+      showQuotaNotice(remainingQuota(), { fromNext: true });
+      return;
+    }
+    confirmBody.innerHTML = items.map(function (r) {
+      var qty = getQty(r.id);
+      return '<tr><td>' + r.code + ' ' + r.name + '</td><td>' + r.lots + '</td><td>' + qty + '</td><td>' + formatMoney(Math.round(estimateAmount(r))) + '</td></tr>';
+    }).join('');
+    var confirmTotal = 0;
+    items.forEach(function (r) { confirmTotal += estimateAmount(r); });
+    document.getElementById('confirm-total').innerHTML =
+      '本次預估融資 <span class="cr-num-red">' + formatMoney(Math.round(confirmTotal)) + '</span> 元';
+    modal.classList.add('is-open');
+    modal.setAttribute('aria-hidden', 'false');
+  }
+  function closeModal() {
+    modal.classList.remove('is-open');
+    modal.setAttribute('aria-hidden', 'true');
+  }
+  function closeNotice() {
+    notice.classList.remove('is-open');
+    notice.setAttribute('aria-hidden', 'true');
+  }
+  function isBlockingNotice() {
+    return activeNotice === 'credit' || activeNotice === 'quota';
+  }
+  function isQuotaNextNotice() {
+    return activeNotice === 'quota-next';
+  }
+  function setNoticeCancelVisible(show) {
+    notice.classList.toggle('is-single', !show);
+    noticeCancel.hidden = !show;
+  }
+  function showSourceNotice() {
+    activeNotice = 'source';
+    setNoticeCancelVisible(true);
+    noticeTitle.textContent = '提示';
+    noticeBody.innerHTML =
+      '<p class="pkt-modal__notice">目前券源不足，無法進行下單改類</p>' +
+      '<p class="pkt-modal__notice">請於T+2日備好足額交割款並匯入口袋錢包或指定交割帳戶</p>';
+    noticeOk.textContent = '我知道了';
+    notice.classList.add('is-open');
+    notice.setAttribute('aria-hidden', 'false');
+  }
+  function isStockShortage() {
+    var q = new URLSearchParams(window.location.search).get('source');
+    if (q === '0' || q === 'false') return true;
+    if (q === '1' || q === 'true') return false;
+    return Math.random() < 0.5;
+  }
+  function showQuotaNotice(balance, opts) {
+    var amt = balance == null ? MARGIN_BALANCE : balance;
+    var fromNext = opts && opts.fromNext;
+    activeNotice = fromNext ? 'quota-next' : 'quota';
+    setNoticeCancelVisible(true);
+    noticeTitle.textContent = '融資餘額不足';
+    noticeBody.innerHTML =
+      '<p class="pkt-modal__notice">您現在融資餘額為 ' + formatMoney(amt) + ' 元，請調整改資買張數，或前往額度申請提高融資額度</p>' +
+      '<p class="pkt-modal__notice">線上額度申請僅限第一類帳戶及第二類帳戶</p>';
+    noticeOk.textContent = '前往額度申請';
+    notice.classList.add('is-open');
+    notice.setAttribute('aria-hidden', 'false');
+  }
+  function openEntryNotice() {
+    activeNotice = NOTICE_TYPE;
+    if (NOTICE_TYPE === 'credit') {
+      setNoticeCancelVisible(true);
+      noticeTitle.textContent = '提示';
+      noticeBody.innerHTML = '<p class="pkt-modal__notice">您尚未開立信用戶，請您前往開立信用戶</p>';
+      noticeOk.textContent = '前往信用戶開戶';
+    } else if (NOTICE_TYPE === 'quota') {
+      showQuotaNotice(MARGIN_BALANCE);
+      return;
+    } else {
+      setNoticeCancelVisible(false);
+      noticeTitle.textContent = '提示';
+      noticeBody.innerHTML =
+        '<p class="pkt-modal__notice">目前僅支援將「現股買進」變更為「融資買進」。</p>' +
+        '<p class="pkt-modal__notice">變更前請確認您已開通信用交易資格，且融資額度足夠。</p>' +
+        '<p class="pkt-modal__notice">是否確認辦理交易類別變更？</p>';
+      noticeOk.textContent = '確認';
+    }
+    notice.classList.add('is-open');
+    notice.setAttribute('aria-hidden', 'false');
+  }
+
+  btnNext.addEventListener('click', openModal);
+  function goPortal() {
+    window.location.href = PORTAL_URL;
+  }
+  document.getElementById('confirm-cancel').addEventListener('click', closeModal);
+  document.getElementById('confirm-backdrop').addEventListener('click', function (e) {
+    e.preventDefault();
+  });
+  function goExternal(url) {
+    if (!url || url === '#') {
+      lockAfterBlockingNotice();
+      closeNotice();
+      return;
+    }
+    window.location.href = url;
+  }
+  document.getElementById('notice-ok').addEventListener('click', function () {
+    if (activeNotice === 'credit') { goExternal(CREDIT_OPEN_URL); return; }
+    if (activeNotice === 'quota' || activeNotice === 'quota-next') { goExternal(QUOTA_APPLY_URL); return; }
+    closeNotice();
+  });
+  document.getElementById('notice-cancel').addEventListener('click', function () {
+    if (isQuotaNextNotice()) {
+      closeNotice();
+      return;
+    }
+    if (isBlockingNotice()) {
+      goPortal();
+      return;
+    }
+    closeNotice();
+  });
+  document.getElementById('notice-backdrop').addEventListener('click', function (e) {
+    e.preventDefault();
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') return;
+    if (modal.classList.contains('is-open')) {
+      closeModal();
+      return;
+    }
+    if (!notice.classList.contains('is-open')) return;
+    if (isQuotaNextNotice()) {
+      closeNotice();
+      return;
+    }
+    if (isBlockingNotice()) goPortal();
+    else closeNotice();
+  });
+  function todayText() {
+    var d = new Date();
+    var m = d.getMonth() + 1;
+    var day = d.getDate();
+    return d.getFullYear() + '/' + (m < 10 ? '0' : '') + m + '/' + (day < 10 ? '0' : '') + day;
+  }
+  function appendRecords(items, status) {
+    var records = loadRecords();
+    var stamp = Date.now();
+    items.forEach(function (r, i) {
+      records.unshift({
+        id: 'R' + stamp + '-' + r.id + '-' + i,
+        date: todayText(),
+        code: r.code,
+        name: r.name,
+        price: r.price,
+        lots: r.lots,
+        convert: getQty(r.id),
+        status: status
+      });
+    });
+    saveRecords(records);
+    renderRecords();
+  }
+  document.getElementById('confirm-submit').addEventListener('click', function () {
+    if (submitting || pageLocked) return;
+    var items = readyItems();
+    if (!items.length) { closeModal(); return; }
+    submitting = true;
+    syncNext();
+    closeModal();
+    if (isStockShortage()) {
+      showSourceNotice();
+      appendRecords(items, 'source');
+      submitting = false;
+      syncNext();
+      return;
+    }
+    appendRecords(items, 'applied');
+    submitting = false;
+    convertQty = {};
+    toast.classList.add('is-visible');
+    window.setTimeout(function () { toast.classList.remove('is-visible'); }, 2400);
+    render();
+  });
+
+  render();
+  showView(parseView());
+})();
+  </script>
+</body>
+</html>
