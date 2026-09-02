@@ -179,6 +179,79 @@ button, input, select { font-family: inherit; }
 }
 .cr-btn-search:hover { background: var(--pkt-red-hover); }
 
+.cr-records-head { margin-bottom: 18px; }
+.cr-toolbar--account { margin-bottom: 12px; }
+
+.cr-records-query {
+  padding: 16px;
+  background: #FAFAFA;
+  border: 1px solid var(--pkt-gray-100);
+  border-radius: var(--pkt-r-md);
+}
+
+.cr-records-query__title {
+  display: block;
+  margin-bottom: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--pkt-ink);
+}
+
+.cr-records-query__fields {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px 16px;
+  margin-bottom: 12px;
+}
+
+.cr-records-query__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--pkt-ink);
+}
+
+.cr-records-query__field input,
+.cr-records-query__field select {
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--pkt-gray-300);
+  border-radius: 6px;
+  font-size: 15px;
+  font-family: inherit;
+  background: #fff;
+  color: var(--pkt-ink);
+}
+
+.cr-records-query__field input:focus,
+.cr-records-query__field select:focus {
+  outline: none;
+  border-color: var(--pkt-red-main);
+}
+
+.cr-records-query__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.cr-btn-plain {
+  height: 40px;
+  min-width: 88px;
+  padding: 0 20px;
+  border: 1px solid var(--pkt-gray-300);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--pkt-ink);
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cr-btn-plain:hover { background: var(--pkt-gray-50); }
+
 .cr-table-wrap { width: 100%; overflow: auto; }
 
 .cr-table {
@@ -243,7 +316,6 @@ button, input, select { font-family: inherit; }
   font-size: 14px;
   font-weight: 600;
 }
-.cr-status--applied { background: #FFF4E5; color: #B86E00; }
 .cr-status--approved { background: #E8F6EE; color: #1B7A3A; }
 .cr-status--source { background: var(--pkt-pink-50); color: var(--pkt-red-main); }
 
@@ -456,6 +528,12 @@ button, input, select { font-family: inherit; }
   color: var(--pkt-ink);
 }
 .pkt-modal--notice .pkt-modal__notice:last-child { margin-bottom: 0; }
+.pkt-modal--notice .pkt-modal__notice a {
+  color: var(--pkt-ink);
+  font-weight: 700;
+  text-decoration: underline;
+  white-space: nowrap;
+}
 .pkt-modal--notice .pkt-modal__actions {
   gap: 12px;
   padding: 0 40px 24px;
@@ -538,6 +616,7 @@ button, input, select { font-family: inherit; }
   .pkt-main { padding: 20px 16px 64px; }
   .pkt-panel { padding: 16px 16px 20px; }
   .cr-toolbar { flex-wrap: wrap; }
+  .cr-records-query__fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .pkt-modal--notice.is-open { padding-top: 360px; }
 }
 @media (max-width: 560px) {
@@ -555,6 +634,7 @@ button, input, select { font-family: inherit; }
   }
   .pkt-page-title { font-size: 18px; }
   .cr-btn-next { width: 100%; }
+  .cr-records-query__fields { grid-template-columns: 1fr; }
   #view-empty .pkt-panel { padding: 48px 20px; }
 }
   </style>
@@ -615,15 +695,41 @@ button, input, select { font-family: inherit; }
 
     <div class="cr-view" id="view-records">
       <div class="pkt-panel">
-        <form class="cr-toolbar" id="records-form">
-          <span class="cr-field-label">證券帳號</span>
-          <input class="cr-account" value="陳小傑 6620-0385361" aria-label="證券帳號" readonly tabindex="-1" />
-          <div class="cr-search">
-            <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="7" cy="7" r="5.25" stroke="currentColor" stroke-width="1.5"/><path d="M11 11l3.2 3.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-            <input type="search" id="records-query" placeholder="輸入股票代號" />
+        <div class="cr-records-head">
+          <div class="cr-toolbar cr-toolbar--account">
+            <span class="cr-field-label">證券帳號</span>
+            <input class="cr-account" value="陳小傑 6620-0385361" aria-label="證券帳號" readonly tabindex="-1" />
           </div>
-          <button type="submit" class="cr-btn-search">搜尋</button>
-        </form>
+          <form class="cr-records-query" id="records-form">
+            <span class="cr-records-query__title">查詢條件</span>
+            <div class="cr-records-query__fields">
+              <label class="cr-records-query__field">
+                <span>申請日期（起）</span>
+                <input type="date" id="records-date-start" />
+              </label>
+              <label class="cr-records-query__field">
+                <span>申請日期（迄）</span>
+                <input type="date" id="records-date-end" />
+              </label>
+              <label class="cr-records-query__field">
+                <span>股票名稱</span>
+                <input type="text" id="records-stock" placeholder="例：台積電 或 2330" />
+              </label>
+              <label class="cr-records-query__field">
+                <span>狀態</span>
+                <select id="records-status">
+                  <option value="">全部</option>
+                  <option value="approved">已通過</option>
+                  <option value="source">券源不足</option>
+                </select>
+              </label>
+            </div>
+            <div class="cr-records-query__actions">
+              <button type="button" class="cr-btn-plain" id="records-clear">清除</button>
+              <button type="submit" class="cr-btn-search">查詢</button>
+            </div>
+          </form>
+        </div>
         <div class="cr-table-wrap">
           <table class="cr-table">
             <thead id="records-thead">
@@ -694,9 +800,9 @@ button, input, select { font-family: inherit; }
 
   <script>
 (function () {
-  var STORAGE_KEY = 'pkt-reclass-records-v3';
+  var STORAGE_KEY = 'pkt-reclass-records-v4';
   var SEED_RECORDS = [
-    { id: 'R1', date: '2026/08/27', code: '2330',  name: '台積電',         price: 1085,  lots: 2, convert: 1, status: 'applied' },
+    { id: 'R1', date: '2026/08/27', code: '2330',  name: '台積電',         price: 1085,  lots: 2, convert: 1, status: 'approved' },
     { id: 'R2', date: '2026/08/26', code: '00712', name: '復華富時不動產', price: 22.15, lots: 5, convert: 3, status: 'source' },
     { id: 'R3', date: '2026/08/25', code: '2317',  name: '鴻海',           price: 214.5, lots: 12, convert: 4, status: 'approved' }
   ];
@@ -734,10 +840,13 @@ button, input, select { font-family: inherit; }
   var activeNotice = NOTICE_TYPE;
 
   var recKeyword = '';
+  var recDateStart = '';
+  var recDateEnd = '';
+  var recStatus = '';
   var recSortKey = 'date';
   var recSortDir = 'desc';
-  var STATUS = { applied: '審核中', approved: '已通過', source: '券源不足' };
-  var STATUS_CLASS = { applied: 'cr-status--applied', approved: 'cr-status--approved', source: 'cr-status--source' };
+  var STATUS = { approved: '已通過', source: '券源不足' };
+  var STATUS_CLASS = { approved: 'cr-status--approved', source: 'cr-status--source' };
   var recThead = document.getElementById('records-thead');
   var recTbody = document.getElementById('records-tbody');
   var viewApply = document.getElementById('view-apply');
@@ -838,9 +947,10 @@ button, input, select { font-family: inherit; }
     btnNext.disabled = pageLocked || submitting || readyItems().length === 0;
   }
   function normalizeRecordStatus(status) {
-    if (status === 'applied' || status === 'approved' || status === 'source') return status;
+    if (status === 'approved' || status === 'source') return status;
+    if (status === 'applied') return 'approved';
     if (status === 'quota' || status === 'other') return 'source';
-    return 'applied';
+    return 'approved';
   }
   function loadRecords() {
     try {
@@ -857,12 +967,43 @@ button, input, select { font-family: inherit; }
   function saveRecords(list) {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(list)); } catch (e) {}
   }
+  function parseRecordDate(str) {
+    if (!str) return null;
+    var parts = String(str).split('/');
+    if (parts.length !== 3) return null;
+    return new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+  }
+  function parseInputDate(str) {
+    if (!str) return null;
+    var parts = String(str).split('-');
+    if (parts.length !== 3) return null;
+    return new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+  }
+  function matchRecordFilters(r) {
+    if (recDateStart || recDateEnd) {
+      var recordDate = parseRecordDate(r.date);
+      if (!recordDate) return false;
+      if (recDateStart) {
+        var startDate = parseInputDate(recDateStart);
+        if (startDate && recordDate < startDate) return false;
+      }
+      if (recDateEnd) {
+        var endDate = parseInputDate(recDateEnd);
+        if (endDate && recordDate > endDate) return false;
+      }
+    }
+    if (recKeyword) {
+      var q = recKeyword.toLowerCase();
+      if (r.code.toLowerCase().indexOf(q) === -1 && r.name.indexOf(recKeyword) === -1) return false;
+    }
+    if (recStatus && r.status !== recStatus) return false;
+    return true;
+  }
+  function hasRecordFilters() {
+    return !!(recDateStart || recDateEnd || recKeyword || recStatus);
+  }
   function recCurrentRows() {
-    var list = loadRecords().filter(function (r) {
-      return !recKeyword ||
-        r.code.toLowerCase().indexOf(recKeyword.toLowerCase()) !== -1 ||
-        r.name.indexOf(recKeyword) !== -1;
-    });
+    var list = loadRecords().filter(matchRecordFilters);
     list.sort(function (a, b) {
       var cmp;
       if (recSortKey === 'name') cmp = (a.code + a.name).localeCompare(b.code + b.name, 'zh-Hant');
@@ -881,7 +1022,9 @@ button, input, select { font-family: inherit; }
     });
     var rows = recCurrentRows();
     if (!rows.length) {
-      recTbody.innerHTML = '<tr><td class="cr-empty" colspan="6">尚無申請紀錄</td></tr>';
+      recTbody.innerHTML = '<tr><td class="cr-empty" colspan="6">' +
+        (hasRecordFilters() ? '查無符合條件的申請紀錄' : '尚無申請紀錄') +
+        '</td></tr>';
       return;
     }
     recTbody.innerHTML = rows.map(function (r) {
@@ -892,7 +1035,7 @@ button, input, select { font-family: inherit; }
           '<td>' + formatPrice(r.price) + '</td>' +
           '<td>' + r.lots.toLocaleString('zh-TW') + '</td>' +
           '<td>' + (r.convert == null ? 0 : r.convert).toLocaleString('zh-TW') + '</td>' +
-          '<td><span class="cr-status ' + (STATUS_CLASS[r.status] || STATUS_CLASS.applied) + '">' + (STATUS[r.status] || STATUS.applied) + '</span></td>' +
+          '<td><span class="cr-status ' + (STATUS_CLASS[r.status] || STATUS_CLASS.approved) + '">' + (STATUS[r.status] || STATUS.approved) + '</span></td>' +
         '</tr>'
       );
     }).join('');
@@ -1030,7 +1173,21 @@ button, input, select { font-family: inherit; }
   });
   document.getElementById('records-form').addEventListener('submit', function (e) {
     e.preventDefault();
-    recKeyword = document.getElementById('records-query').value.trim();
+    recDateStart = document.getElementById('records-date-start').value;
+    recDateEnd = document.getElementById('records-date-end').value;
+    recKeyword = document.getElementById('records-stock').value.trim();
+    recStatus = document.getElementById('records-status').value;
+    renderRecords();
+  });
+  document.getElementById('records-clear').addEventListener('click', function () {
+    document.getElementById('records-date-start').value = '';
+    document.getElementById('records-date-end').value = '';
+    document.getElementById('records-stock').value = '';
+    document.getElementById('records-status').value = '';
+    recDateStart = '';
+    recDateEnd = '';
+    recKeyword = '';
+    recStatus = '';
     renderRecords();
   });
   window.addEventListener('hashchange', function () {
@@ -1080,22 +1237,53 @@ button, input, select { font-family: inherit; }
     notice.classList.toggle('is-single', !show);
     noticeCancel.hidden = !show;
   }
-  function showSourceNotice() {
-    activeNotice = 'source';
-    setNoticeCancelVisible(true);
+  function showSubmitResultNotice(type) {
+    activeNotice = 'submit-' + type;
+    setNoticeCancelVisible(false);
     noticeTitle.textContent = '提示';
-    noticeBody.innerHTML =
-      '<p class="pkt-modal__notice">目前券源不足，無法進行下單改類</p>' +
-      '<p class="pkt-modal__notice">請於T+2日備好足額交割款並匯入口袋錢包或指定交割帳戶</p>';
     noticeOk.textContent = '我知道了';
+    if (type === 'success') {
+      noticeBody.innerHTML =
+        '<p class="pkt-modal__notice">已成功送出申請，請稍等5分鐘後至申請紀錄及口袋台股確認</p>';
+    } else if (type === 'source') {
+      noticeBody.innerHTML =
+        '<p class="pkt-modal__notice">券源不足，請於T+2日確認交割帳戶有足額交割款</p>' +
+        '<p class="pkt-modal__notice">若有問題，請於服務時間致電客服：<a href="tel:0809-089-001">0809-089-001</a></p>';
+    } else if (type === 'network') {
+      noticeBody.innerHTML =
+        '<p class="pkt-modal__notice">連線異常，請稍後5分鐘再次申請</p>' +
+        '<p class="pkt-modal__notice">若有問題，請於服務時間致電客服：<a href="tel:0809-089-001">0809-089-001</a></p>';
+    }
     notice.classList.add('is-open');
     notice.setAttribute('aria-hidden', 'false');
   }
+  function isSubmitResultNotice() {
+    return activeNotice === 'submit-success' ||
+      activeNotice === 'submit-source' ||
+      activeNotice === 'submit-network';
+  }
+  function getSubmitScenario() {
+    var q = new URLSearchParams(window.location.search).get('submit');
+    if (q === 'network' || q === 'error') return 'network';
+    if (q === 'source') return 'source';
+    if (q === 'success') return 'success';
+    return null;
+  }
   function isStockShortage() {
+    var scenario = getSubmitScenario();
+    if (scenario === 'source') return true;
+    if (scenario === 'success' || scenario === 'network') return false;
     var q = new URLSearchParams(window.location.search).get('source');
     if (q === '0' || q === 'false') return true;
     if (q === '1' || q === 'true') return false;
     return Math.random() < 0.5;
+  }
+  function isNetworkError() {
+    var scenario = getSubmitScenario();
+    if (scenario === 'network') return true;
+    if (scenario === 'success' || scenario === 'source') return false;
+    var q = new URLSearchParams(window.location.search).get('network');
+    return q === '1' || q === 'true' || q === 'fail' || q === 'error';
   }
   function showQuotaNotice(balance, opts) {
     var amt = balance == null ? MARGIN_BALANCE : balance;
@@ -1175,7 +1363,7 @@ button, input, select { font-family: inherit; }
       return;
     }
     if (!notice.classList.contains('is-open')) return;
-    if (isQuotaNextNotice()) {
+    if (isQuotaNextNotice() || isSubmitResultNotice()) {
       closeNotice();
       return;
     }
@@ -1213,19 +1401,25 @@ button, input, select { font-family: inherit; }
     submitting = true;
     syncNext();
     closeModal();
-    if (isStockShortage()) {
-      showSourceNotice();
-      appendRecords(items, 'source');
+    if (isNetworkError()) {
+      showSubmitResultNotice('network');
       submitting = false;
       syncNext();
       return;
     }
-    appendRecords(items, 'applied');
+    if (isStockShortage()) {
+      showSubmitResultNotice('source');
+      appendRecords(items, 'source');
+      submitting = false;
+      syncNext();
+      render();
+      return;
+    }
+    appendRecords(items, 'approved');
     submitting = false;
     convertQty = {};
-    toast.classList.add('is-visible');
-    window.setTimeout(function () { toast.classList.remove('is-visible'); }, 2400);
     render();
+    showSubmitResultNotice('success');
   });
 
   render();
