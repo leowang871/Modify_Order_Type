@@ -360,7 +360,8 @@ button, input, select { font-family: inherit; }
 }
 .cr-num-red { color: var(--pkt-red-main); font-weight: 700; }
 .cr-num-warn { color: var(--pkt-red-deep); font-weight: 700; }
-.cr-table tfoot tr.is-over td { background: #FFE8E8; }
+.cr-table tfoot tr.is-over td,
+.cr-summary tfoot tr.is-over td { background: #FFE8E8; }
 .pkt-panel.is-locked .cr-table-wrap,
 .pkt-panel.is-locked .cr-toolbar,
 .pkt-panel.is-locked .cr-footer {
@@ -1212,10 +1213,15 @@ button, input, select { font-family: inherit; }
       var qty = getQty(r.id);
       return '<tr><td>' + r.code + ' ' + r.name + '</td><td>' + r.lots + '</td><td>' + qty + '</td><td>' + formatMoney(Math.round(estimateAmount(r))) + '</td></tr>';
     }).join('');
-    var confirmTotal = 0;
-    items.forEach(function (r) { confirmTotal += estimateAmount(r); });
-    document.getElementById('confirm-total').innerHTML =
-      '本次預估融資 <span class="cr-num-red">' + formatMoney(Math.round(confirmTotal)) + '</span> 元';
+    var confirmTotal = Math.round(totalEstimate());
+    var remain = remainingQuota();
+    var remainClass = remain < 0 ? 'cr-num-warn' : 'cr-num-red';
+    var confirmFoot = document.getElementById('confirm-total');
+    confirmFoot.parentNode.className = remain < 0 ? 'is-over' : '';
+    confirmFoot.innerHTML =
+      '本次預估融資 <span class="cr-num-red">' + formatMoney(confirmTotal) +
+      '</span> 元，申請後剩餘額度 <span class="' + remainClass + '">' + formatMoney(remain) +
+      '</span> 元';
     modal.classList.add('is-open');
     modal.setAttribute('aria-hidden', 'false');
   }
