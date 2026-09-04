@@ -529,6 +529,9 @@ button, input, select { font-family: inherit; }
   color: var(--pkt-ink);
 }
 .pkt-modal--notice .pkt-modal__notice:last-child { margin-bottom: 0; }
+.pkt-modal--notice .pkt-modal__notice--alert {
+  color: var(--pkt-red-main);
+}
 .pkt-modal--notice .pkt-modal__notice a {
   color: var(--pkt-ink);
   font-weight: 700;
@@ -721,7 +724,7 @@ button, input, select { font-family: inherit; }
                 <select id="records-status">
                   <option value="">全部</option>
                   <option value="approved">已通過</option>
-                  <option value="source">券源不足</option>
+                  <option value="source">配額不足</option>
                 </select>
               </label>
             </div>
@@ -846,7 +849,7 @@ button, input, select { font-family: inherit; }
   var recStatus = '';
   var recSortKey = 'date';
   var recSortDir = 'desc';
-  var STATUS = { approved: '已通過', source: '券源不足' };
+  var STATUS = { approved: '已通過', source: '配額不足' };
   var STATUS_CLASS = { approved: 'cr-status--approved', source: 'cr-status--source' };
   var recThead = document.getElementById('records-thead');
   var recTbody = document.getElementById('records-tbody');
@@ -1253,7 +1256,7 @@ button, input, select { font-family: inherit; }
         '<p class="pkt-modal__notice">已成功送出申請，請稍等5分鐘後至申請紀錄及口袋台股確認</p>';
     } else if (type === 'source') {
       noticeBody.innerHTML =
-        '<p class="pkt-modal__notice">券源不足，請於T+2日確認交割帳戶有足額交割款</p>' +
+        '<p class="pkt-modal__notice">配額不足，請於T+2日確認交割帳戶有足額交割款</p>' +
         '<p class="pkt-modal__notice">若有問題，請於服務時間致電客服：<a href="tel:0809-089-001">0809-089-001</a></p>';
     } else if (type === 'network') {
       noticeBody.innerHTML =
@@ -1299,7 +1302,7 @@ button, input, select { font-family: inherit; }
     noticeTitle.textContent = '融資餘額不足';
     noticeBody.innerHTML =
       '<p class="pkt-modal__notice">您現在融資餘額為 ' + formatMoney(amt) + ' 元，請調整改資買張數，或前往額度申請提高融資額度</p>' +
-      '<p class="pkt-modal__notice">線上額度申請僅限第一類帳戶及第二類帳戶</p>';
+      '<p class="pkt-modal__notice pkt-modal__notice--alert">線上額度申請僅限第一類帳戶及第二類帳戶，調整額度需經過元大證金審核，預計審核日為兩個工作天</p>';
     noticeOk.textContent = '前往額度申請';
     notice.classList.add('is-open');
     notice.setAttribute('aria-hidden', 'false');
@@ -1309,7 +1312,9 @@ button, input, select { font-family: inherit; }
     if (NOTICE_TYPE === 'credit') {
       setNoticeCancelVisible(true);
       noticeTitle.textContent = '提示';
-      noticeBody.innerHTML = '<p class="pkt-modal__notice">您尚未開立信用戶，請您前往開立信用戶</p>';
+      noticeBody.innerHTML =
+        '<p class="pkt-modal__notice">您尚未開立信用戶，請您前往開立信用戶</p>' +
+        '<p class="pkt-modal__notice pkt-modal__notice--alert">信用戶開戶需經審核，預計審核日為兩個工作天</p>';
       noticeOk.textContent = '前往信用戶開戶';
     } else if (NOTICE_TYPE === 'quota') {
       showQuotaNotice(MARGIN_BALANCE);
