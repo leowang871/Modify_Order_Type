@@ -178,6 +178,10 @@ button, input, select { font-family: inherit; }
   cursor: pointer;
 }
 .cr-btn-search:hover { background: var(--pkt-red-hover); }
+.cr-btn-search:disabled {
+  background: var(--pkt-gray-300);
+  cursor: not-allowed;
+}
 
 .cr-records-head { margin-bottom: 18px; }
 .cr-toolbar--account { margin-bottom: 12px; }
@@ -439,6 +443,48 @@ button, input, select { font-family: inherit; }
 .cr-empty {
   padding: 48px 16px;
   text-align: center;
+  color: var(--pkt-gray-500);
+}
+
+.cr-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 20px 8px 4px;
+  flex-wrap: wrap;
+}
+.cr-pagination__btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1.5px solid var(--pkt-red-main);
+  background: #fff;
+  color: var(--pkt-red-main);
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.cr-pagination__btn:hover:not(:disabled):not(.is-active) {
+  background: var(--pkt-member-bg);
+}
+.cr-pagination__btn.is-active {
+  background: var(--pkt-red-main);
+  border-color: var(--pkt-red-main);
+  color: #fff;
+  cursor: default;
+}
+.cr-pagination__btn:disabled {
+  border-color: var(--pkt-gray-300);
+  color: var(--pkt-gray-300);
+  cursor: not-allowed;
+}
+.cr-pagination__info {
+  font-size: 13px;
   color: var(--pkt-gray-500);
 }
 
@@ -731,6 +777,7 @@ button, input, select { font-family: inherit; }
             <div class="cr-records-query__actions">
               <button type="button" class="cr-btn-plain" id="records-clear">清除</button>
               <button type="submit" class="cr-btn-search">查詢</button>
+              <button type="button" class="cr-btn-search" id="records-export">匯出</button>
             </div>
           </form>
         </div>
@@ -749,6 +796,7 @@ button, input, select { font-family: inherit; }
             <tbody id="records-tbody"></tbody>
           </table>
         </div>
+        <nav class="cr-pagination" id="records-pagination" aria-label="申請紀錄分頁" hidden></nav>
       </div>
     </div>
 
@@ -804,11 +852,20 @@ button, input, select { font-family: inherit; }
 
   <script>
 (function () {
-  var STORAGE_KEY = 'pkt-reclass-records-v4';
+  var STORAGE_KEY = 'pkt-reclass-records-v5';
   var SEED_RECORDS = [
-    { id: 'R1', date: '2026/08/27', code: '2330',  name: '台積電',         price: 1085,  lots: 2, convert: 1, status: 'approved' },
-    { id: 'R2', date: '2026/08/26', code: '00712', name: '復華富時不動產', price: 22.15, lots: 5, convert: 3, status: 'source' },
-    { id: 'R3', date: '2026/08/25', code: '2317',  name: '鴻海',           price: 214.5, lots: 12, convert: 4, status: 'approved' }
+    { id: 'R1',  date: '2026/09/10', code: '2330',  name: '台積電',         price: 1085,  lots: 2,  convert: 1,  status: 'approved' },
+    { id: 'R2',  date: '2026/09/09', code: '00712', name: '復華富時不動產', price: 22.15, lots: 5,  convert: 3,  status: 'source' },
+    { id: 'R3',  date: '2026/09/08', code: '2317',  name: '鴻海',           price: 214.5, lots: 12, convert: 4,  status: 'approved' },
+    { id: 'R4',  date: '2026/09/07', code: '2454',  name: '聯發科',         price: 1420,  lots: 2,  convert: 2,  status: 'approved' },
+    { id: 'R5',  date: '2026/09/06', code: '2303',  name: '聯電',           price: 58.7,  lots: 25, convert: 10, status: 'source' },
+    { id: 'R6',  date: '2026/09/05', code: '2882',  name: '國泰金',         price: 68.9,  lots: 20, convert: 8,  status: 'approved' },
+    { id: 'R7',  date: '2026/09/04', code: '2603',  name: '長榮',           price: 196,   lots: 8,  convert: 5,  status: 'approved' },
+    { id: 'R8',  date: '2026/09/03', code: '2412',  name: '中華電',         price: 132.5, lots: 6,  convert: 6,  status: 'source' },
+    { id: 'R9',  date: '2026/09/02', code: '3008',  name: '大立光',         price: 2385,  lots: 1,  convert: 1,  status: 'approved' },
+    { id: 'R10', date: '2026/09/01', code: '2308',  name: '台達電',         price: 903,   lots: 4,  convert: 2,  status: 'approved' },
+    { id: 'R11', date: '2026/08/29', code: '2891',  name: '中信金',         price: 42.15, lots: 30, convert: 15, status: 'source' },
+    { id: 'R12', date: '2026/08/28', code: '2357',  name: '華碩',           price: 682,   lots: 3,  convert: 1,  status: 'approved' }
   ];
   var APPLY_ROWS = [
     { id: 'M1', code: '00712', name: '復華富時不動產', lots: 5,  price: 22.15 },
@@ -849,10 +906,14 @@ button, input, select { font-family: inherit; }
   var recStatus = '';
   var recSortKey = 'date';
   var recSortDir = 'desc';
+  var REC_PAGE_SIZE = 10;
+  var recPage = 1;
   var STATUS = { approved: '已通過', source: '配額不足' };
   var STATUS_CLASS = { approved: 'cr-status--approved', source: 'cr-status--source' };
   var recThead = document.getElementById('records-thead');
   var recTbody = document.getElementById('records-tbody');
+  var recPagination = document.getElementById('records-pagination');
+  var recExport = document.getElementById('records-export');
   var viewApply = document.getElementById('view-apply');
   var viewRecords = document.getElementById('view-records');
   var viewEmpty = document.getElementById('view-empty');
@@ -1017,6 +1078,28 @@ button, input, select { font-family: inherit; }
     });
     return list;
   }
+  function renderRecordsPagination(totalItems) {
+    var totalPages = Math.max(1, Math.ceil(totalItems / REC_PAGE_SIZE));
+    if (recPage > totalPages) recPage = totalPages;
+    if (recPage < 1) recPage = 1;
+    if (!totalItems) {
+      recPagination.hidden = true;
+      recPagination.innerHTML = '';
+      return;
+    }
+    recPagination.hidden = false;
+    var html = '<button type="button" class="cr-pagination__btn" data-page="prev" ' +
+      (recPage <= 1 ? 'disabled' : '') + ' aria-label="上一頁">‹</button>';
+    for (var p = 1; p <= totalPages; p += 1) {
+      html += '<button type="button" class="cr-pagination__btn' +
+        (p === recPage ? ' is-active' : '') + '" data-page="' + p + '"' +
+        (p === recPage ? ' aria-current="page"' : '') + '>' + p + '</button>';
+    }
+    html += '<button type="button" class="cr-pagination__btn" data-page="next" ' +
+      (recPage >= totalPages ? 'disabled' : '') + ' aria-label="下一頁">›</button>';
+    html += '<span class="cr-pagination__info">共 ' + totalItems.toLocaleString('zh-TW') + ' 筆</span>';
+    recPagination.innerHTML = html;
+  }
   function renderRecords() {
     recThead.querySelectorAll('.cr-sort').forEach(function (btn) {
       var key = btn.getAttribute('data-sort');
@@ -1025,13 +1108,19 @@ button, input, select { font-family: inherit; }
       });
     });
     var rows = recCurrentRows();
+    renderRecordsPagination(rows.length);
+    recExport.disabled = rows.length === 0;
     if (!rows.length) {
       recTbody.innerHTML = '<tr><td class="cr-empty" colspan="6">' +
         (hasRecordFilters() ? '查無符合條件的申請紀錄' : '尚無申請紀錄') +
         '</td></tr>';
       return;
     }
-    recTbody.innerHTML = rows.map(function (r) {
+    var totalPages = Math.max(1, Math.ceil(rows.length / REC_PAGE_SIZE));
+    if (recPage > totalPages) recPage = totalPages;
+    var start = (recPage - 1) * REC_PAGE_SIZE;
+    var pageRows = rows.slice(start, start + REC_PAGE_SIZE);
+    recTbody.innerHTML = pageRows.map(function (r) {
       return (
         '<tr class="cr-row">' +
           '<td>' + r.date + '</td>' +
@@ -1043,6 +1132,36 @@ button, input, select { font-family: inherit; }
         '</tr>'
       );
     }).join('');
+  }
+  function exportRecordsCsv() {
+    var rows = recCurrentRows();
+    if (!rows.length) return;
+    var header = ['申請日期', '股票代號', '股票名稱', '單價', '可改類張數', '改資買張數', '狀態'];
+    var lines = rows.map(function (r) {
+      return [
+        r.date,
+        r.code,
+        r.name,
+        formatPrice(r.price),
+        r.lots,
+        r.convert == null ? 0 : r.convert,
+        STATUS[r.status] || STATUS.approved
+      ];
+    });
+    var csv = [header].concat(lines)
+      .map(function (cols) {
+        return cols.map(function (v) {
+          return '"' + String(v).replace(/"/g, '""') + '"';
+        }).join(',');
+      })
+      .join('\r\n');
+    var blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = '改類申請紀錄_' + new Date().toISOString().slice(0, 10) + '.csv';
+    a.click();
+    URL.revokeObjectURL(url);
   }
   function parseView() {
     var h = (window.location.hash || '').replace('#', '');
@@ -1173,6 +1292,18 @@ button, input, select { font-family: inherit; }
     var key = btn.getAttribute('data-sort');
     if (recSortKey === key) recSortDir = recSortDir === 'asc' ? 'desc' : 'asc';
     else { recSortKey = key; recSortDir = 'asc'; }
+    recPage = 1;
+    renderRecords();
+  });
+  recPagination.addEventListener('click', function (e) {
+    var btn = e.target.closest('[data-page]');
+    if (!btn || btn.disabled || btn.classList.contains('is-active')) return;
+    var target = btn.getAttribute('data-page');
+    var totalItems = recCurrentRows().length;
+    var totalPages = Math.max(1, Math.ceil(totalItems / REC_PAGE_SIZE));
+    if (target === 'prev') recPage = Math.max(1, recPage - 1);
+    else if (target === 'next') recPage = Math.min(totalPages, recPage + 1);
+    else recPage = parseInt(target, 10) || 1;
     renderRecords();
   });
   document.getElementById('records-form').addEventListener('submit', function (e) {
@@ -1181,6 +1312,7 @@ button, input, select { font-family: inherit; }
     recDateEnd = document.getElementById('records-date-end').value;
     recKeyword = document.getElementById('records-stock').value.trim();
     recStatus = document.getElementById('records-status').value;
+    recPage = 1;
     renderRecords();
   });
   document.getElementById('records-clear').addEventListener('click', function () {
@@ -1192,8 +1324,10 @@ button, input, select { font-family: inherit; }
     recDateEnd = '';
     recKeyword = '';
     recStatus = '';
+    recPage = 1;
     renderRecords();
   });
+  recExport.addEventListener('click', exportRecordsCsv);
   window.addEventListener('hashchange', function () {
     showView(parseView());
   });
@@ -1302,7 +1436,7 @@ button, input, select { font-family: inherit; }
     noticeTitle.textContent = '融資餘額不足';
     noticeBody.innerHTML =
       '<p class="pkt-modal__notice">您現在融資餘額為 ' + formatMoney(amt) + ' 元，請調整改資買張數，或前往額度申請提高融資額度</p>' +
-      '<p class="pkt-modal__notice pkt-modal__notice--alert">線上額度申請僅限第一類帳戶及第二類帳戶，調整額度需經過元大證金審核，預計審核日為兩個工作天</p>';
+      '<p class="pkt-modal__notice pkt-modal__notice--alert">線上額度申請僅限第一類帳戶及第二類帳戶，調整額度需經過元大證金審核，預計審核日為2個工作天</p>';
     noticeOk.textContent = '前往額度申請';
     notice.classList.add('is-open');
     notice.setAttribute('aria-hidden', 'false');
@@ -1314,7 +1448,7 @@ button, input, select { font-family: inherit; }
       noticeTitle.textContent = '提示';
       noticeBody.innerHTML =
         '<p class="pkt-modal__notice">您尚未開立信用戶，請您前往開立信用戶</p>' +
-        '<p class="pkt-modal__notice pkt-modal__notice--alert">信用戶開戶需經審核，預計審核日為兩個工作天</p>';
+        '<p class="pkt-modal__notice pkt-modal__notice--alert">信用戶開戶需經元大證金審核，預計審核日為2個工作天</p>';
       noticeOk.textContent = '前往信用戶開戶';
     } else if (NOTICE_TYPE === 'quota') {
       showQuotaNotice(MARGIN_BALANCE);
