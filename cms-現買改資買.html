@@ -1,0 +1,1221 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>口袋證券 · 現買改資買 CMS 原型</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+/* ──────────────────────────────────────────────────────────────
+   Design tokens（沿用 index1.html／web_style-guide.html）
+   ────────────────────────────────────────────────────────────── */
+:root {
+  --brand-red:        rgb(230,   0,  57);
+  --brand-coral:      rgb(249,  88, 104);
+  --brand-coral-deep: rgb(233,  84, 101);
+  --brand-crimson:    rgb(202,  16,  57);
+  --brand-blush:      rgb(251, 227, 227);
+  --brand-blush-soft: rgb(255, 183, 183);
+  --brand-cream:      rgb(255, 242, 242);
+
+  --neutral-0:   rgb(255, 255, 255);
+  --neutral-50:  rgb(247, 247, 247);
+  --neutral-100: rgb(245, 245, 245);
+  --neutral-200: rgb(238, 238, 239);
+  --neutral-400: rgb(200, 201, 202);
+  --neutral-500: rgb(158, 158, 159);
+  --neutral-700: rgb(113, 112, 113);
+
+  --shadow-header:  0 1px 1px 0 rgba(0, 0, 0, 0.25);
+  --shadow-sidebar: 1px 1px 4px 0 rgba(0, 0, 0, 0.25);
+  --shadow-card:    3px 5px 10px 0 rgba(0, 0, 0, 0.10);
+
+  --radius-sm:   6px;
+  --radius-md:   8px;
+  --radius-lg:  10px;
+  --radius-pill: 15px;
+
+  --font-sans: "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", "Heiti TC", sans-serif;
+  --font-num:  "Inter", "PingFang TC", "Noto Sans TC", sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--brand-cream);
+  font-family: var(--font-sans);
+  color: #000;
+}
+
+#root { width: 100%; min-height: 100vh; }
+
+/* ── CMS 外殼（header / sidebar / main） ───────────────────────── */
+.cms-shell {
+  width: 100%;
+  min-height: 100vh;
+  background: var(--brand-cream);
+  display: grid;
+  grid-template-columns: 248px minmax(0, 1fr);
+  grid-template-rows: 60px 1fr;
+  grid-template-areas:
+    "header header"
+    "side main";
+}
+
+.cms-header {
+  grid-area: header;
+  height: 60px;
+  background: #fff;
+  box-shadow: var(--shadow-header);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 24px;
+  position: sticky;
+  top: 0;
+  z-index: 30;
+}
+
+.cms-menu-btn {
+  display: none;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--neutral-400);
+  border-radius: var(--radius-md);
+  background: #fff;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.cms-header__user {
+  font-weight: 700;
+  font-size: 16px;
+  white-space: nowrap;
+}
+
+.cms-header__logout {
+  margin-left: 8px;
+  height: 35px;
+  padding: 0 18px;
+  background: #fff;
+  color: var(--brand-coral-deep);
+  border: 1px solid var(--brand-coral-deep);
+  border-radius: var(--radius-md);
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 16px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.cms-header__logout:hover { background: var(--brand-blush); }
+
+.cms-sidebar {
+  grid-area: side;
+  width: 248px;
+  background: #fff;
+  box-shadow: var(--shadow-sidebar);
+  padding: 20px 20px 60px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 25;
+  overflow: auto;
+}
+
+.cms-nav-group {
+  height: 40px;
+  border: none;
+  background: transparent;
+  border-radius: var(--radius-pill);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+  font-family: inherit;
+  font-weight: 500;
+  font-size: 17px;
+  color: #000;
+  text-align: left;
+  cursor: pointer;
+}
+
+.cms-nav-item {
+  height: 30px;
+  padding-left: 32px;
+  display: flex;
+  align-items: center;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  font-weight: 500;
+  font-size: 15px;
+  color: #000;
+  text-align: left;
+  cursor: pointer;
+}
+
+.cms-nav-item.is-active { color: var(--brand-coral-deep); }
+
+.cms-main {
+  grid-area: main;
+  padding: 40px 36px 48px;
+  overflow: auto;
+  min-width: 0;
+}
+
+.cms-backdrop { display: none; }
+
+.cms-card {
+  background: #fff;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: 28px;
+}
+
+/* ── 現買改資買 頁面 ──────────────────────────────────────────── */
+.mc-page-title {
+  margin: 0 0 20px;
+  font-size: clamp(20px, 2.5vw, 24px);
+  font-weight: 700;
+}
+
+.mc-sheets {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  margin: 0 0 16px;
+  border-bottom: 1px solid var(--neutral-200);
+}
+
+.mc-sheet {
+  min-width: 140px;
+  height: 40px;
+  padding: 0 18px;
+  margin-bottom: -1px;
+  border: 1px solid var(--neutral-200);
+  border-bottom: none;
+  border-radius: 10px 10px 0 0;
+  background: var(--neutral-50);
+  color: var(--neutral-700);
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.mc-sheet.is-active {
+  background: var(--brand-coral);
+  border-color: var(--brand-coral);
+  color: #fff;
+}
+
+.mc-notice {
+  margin-bottom: 16px;
+  padding: 10px 14px;
+  border: 1px solid var(--brand-blush);
+  border-radius: var(--radius-md);
+  background: var(--brand-cream);
+  color: var(--brand-crimson);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* 查詢條件 */
+.mc-query {
+  margin-bottom: 16px;
+  padding: 16px;
+  background: rgb(248, 248, 249);
+  border: 1px solid var(--neutral-200);
+  border-radius: var(--radius-md);
+}
+
+.mc-query__title {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.mc-query__fields {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px 16px;
+  margin-bottom: 12px;
+}
+
+.mc-query__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.mc-query__field input,
+.mc-query__field select {
+  height: 35px;
+  padding: 0 10px;
+  border: 1px solid var(--neutral-400);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-family: inherit;
+  background: #fff;
+}
+
+.mc-query__field input:focus,
+.mc-query__field select:focus {
+  outline: none;
+  border-color: var(--brand-coral-deep);
+}
+
+.mc-query__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* 按鈕 */
+.mc-btn {
+  height: 34px;
+  padding: 0 16px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.mc-btn--primary {
+  background: var(--brand-coral);
+  border: 1px solid var(--brand-coral);
+  color: #fff;
+}
+
+.mc-btn--primary:hover { background: var(--brand-crimson); border-color: var(--brand-crimson); }
+
+.mc-btn--ghost {
+  background: #fff;
+  border: 1px solid var(--brand-coral-deep);
+  color: var(--brand-coral-deep);
+}
+
+.mc-btn--ghost:hover { background: var(--brand-blush); }
+
+.mc-btn--plain {
+  background: #fff;
+  border: 1px solid var(--neutral-400);
+  color: var(--neutral-700);
+}
+
+.mc-btn--plain:hover { background: var(--neutral-50); }
+
+.mc-btn:disabled {
+  background: var(--neutral-100);
+  border-color: var(--neutral-200);
+  color: var(--neutral-500);
+  cursor: not-allowed;
+}
+
+.mc-btn--primary:disabled,
+.mc-btn--primary:disabled:hover {
+  background: var(--neutral-100);
+  border-color: var(--neutral-200);
+  color: var(--neutral-500);
+}
+
+/* 表格上方工具列 */
+.mc-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.mc-toolbar__meta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  font-size: 13px;
+  color: var(--neutral-700);
+}
+
+.mc-toolbar__hint { color: var(--brand-red); font-weight: 500; }
+
+/* 表格 */
+.mc-table-wrap {
+  width: 100%;
+  overflow: auto;
+  max-height: 480px;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  -webkit-overflow-scrolling: touch;
+}
+
+.mc-table-wrap table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.mc-th, .mc-td { text-align: center; vertical-align: middle; }
+
+.mc-th {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  padding: 10px 4px;
+  background: var(--brand-blush);
+  font-weight: 600;
+  font-size: 13px;
+  line-height: 1.3;
+  border-bottom: 1px solid var(--neutral-200);
+}
+
+.mc-th--group { border-left: 1px solid rgba(0, 0, 0, 0.08); }
+
+.mc-td {
+  padding: 11px 4px;
+  border-bottom: 1px solid var(--neutral-200);
+  white-space: nowrap;
+}
+
+.mc-td--stock { white-space: normal; line-height: 1.35; }
+
+.mc-tr--odd { background: #fff; }
+.mc-tr--even { background: var(--neutral-50); }
+
+.mc-table-wrap tr.is-selected,
+.mc-table-wrap tr.is-selected .mc-td {
+  background: var(--brand-blush);
+}
+
+.mc-th--check,
+.mc-td--check {
+  width: 40px;
+  min-width: 40px;
+  max-width: 40px;
+  padding: 10px 4px;
+}
+
+.mc-table__check-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.mc-table-wrap input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--brand-coral);
+  cursor: pointer;
+}
+
+.mc-td--num {
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+}
+
+.mc-sort {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: inherit;
+  padding: 0;
+  cursor: pointer;
+}
+
+.mc-sort:hover { color: var(--brand-coral-deep); }
+
+.mc-sort__arrows {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 1px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.mc-sort__arrow { color: rgb(180, 180, 180); font-size: 9px; line-height: 1; }
+.mc-sort__arrow.is-active { color: var(--brand-coral); }
+
+.mc-empty {
+  padding: 48px 16px;
+  text-align: center;
+  color: var(--neutral-700);
+  font-size: 15px;
+  background: #fff;
+}
+
+/* 類別標籤（現買／融資／融券） */
+.mc-tag {
+  display: inline-block;
+  min-width: 40px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.mc-tag--cash   { background: var(--neutral-100); color: rgb(65, 65, 65); }
+.mc-tag--margin { background: var(--brand-blush); color: var(--brand-crimson); }
+.mc-tag--short  { background: rgb(232, 238, 254); color: rgb(58, 85, 184); }
+
+/* 狀態 */
+.mc-status {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.mc-status--approved { background: #E4F3EB; color: rgb(31, 138, 91); }
+.mc-status--source { background: #FFEAEA; color: var(--brand-crimson); }
+.mc-status--error { background: #F3E8FF; color: #6B21A8; }
+.mc-status--control { background: #FFF4E5; color: #B45309; }
+
+/* 列內操作 */
+.mc-row-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+}
+
+.mc-link {
+  border: none;
+  background: transparent;
+  padding: 0;
+  font: inherit;
+  font-size: 14px;
+  color: var(--brand-coral-deep);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.mc-link--danger { color: var(--brand-crimson); }
+.mc-link--ok { color: rgb(31, 138, 91); }
+
+/* 分頁 */
+.mc-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 20px 16px 4px;
+  flex-wrap: wrap;
+}
+
+.mc-pagination__btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1.5px solid var(--brand-coral-deep);
+  background: #fff;
+  color: var(--brand-coral-deep);
+  font-size: 15px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mc-pagination__btn:hover:not(:disabled):not(.is-active) { background: var(--brand-blush); }
+
+.mc-pagination__btn.is-active {
+  background: var(--brand-coral);
+  border-color: var(--brand-coral);
+  color: #fff;
+  cursor: default;
+}
+
+.mc-pagination__btn:disabled {
+  border-color: var(--neutral-400);
+  color: var(--neutral-400);
+  cursor: not-allowed;
+}
+
+.mc-pagination__info { font-size: 13px; color: var(--neutral-700); }
+
+.mc-footer-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  padding: 8px 0 4px;
+}
+
+.mc-btn--lg {
+  height: 44px;
+  padding: 0 28px;
+  font-size: 16px;
+  border-radius: var(--radius-md);
+}
+
+.mc-summary-lead {
+  margin: 0 0 14px;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.mc-summary-wrap {
+  overflow-x: hidden;
+  overflow-y: auto;
+  max-height: min(420px, calc(100vh - 260px));
+  border: 1px solid var(--neutral-200);
+  border-radius: var(--radius-md);
+}
+
+.mc-summary-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  table-layout: auto;
+}
+
+.mc-summary-table th,
+.mc-summary-table td {
+  padding: 10px 10px;
+  text-align: center;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--neutral-200);
+}
+
+.mc-summary-table th {
+  position: sticky;
+  top: 0;
+  background: var(--brand-blush);
+  font-weight: 600;
+}
+
+.mc-summary-table tbody tr:nth-child(even) { background: var(--neutral-50); }
+
+/* 彈窗 */
+.mc-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+}
+
+.mc-modal {
+  width: 100%;
+  max-width: 640px;
+  max-height: calc(100vh - 48px);
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
+}
+
+.mc-modal--sm { max-width: 420px; }
+
+.mc-modal.mc-modal--wide {
+  width: min(1120px, calc(100vw - 32px));
+  max-width: none;
+}
+
+.mc-modal__head {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 52px;
+  padding: 12px 48px;
+  background: var(--brand-coral);
+  color: #fff;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.mc-modal__close {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  color: #fff;
+  font-size: 26px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+}
+
+.mc-modal__body {
+  padding: 20px 24px;
+  overflow: auto;
+}
+
+.mc-modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 16px 24px 20px;
+  border-top: 1px solid var(--neutral-200);
+}
+
+.mc-modal__text { margin: 0; font-size: 15px; line-height: 1.7; }
+
+.mc-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 24px;
+}
+
+.mc-detail-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--neutral-200);
+}
+
+.mc-detail-row--full { grid-column: 1 / -1; }
+
+.mc-detail-row__label { font-size: 13px; color: var(--neutral-700); }
+.mc-detail-row__value { font-size: 16px; font-weight: 500; }
+
+.mc-modal__reason {
+  width: 100%;
+  min-height: 84px;
+  margin-top: 10px;
+  padding: 10px;
+  border: 1px solid var(--neutral-400);
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: 15px;
+  resize: vertical;
+}
+
+.mc-modal__reason:focus { outline: none; border-color: var(--brand-coral-deep); }
+
+/* ── RWD ──────────────────────────────────────────────────────── */
+@media (max-width: 1280px) {
+  .mc-query__fields { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+/* 窄桌機：縮小外框留白，讓名單表格不需左右滑動 */
+@media (max-width: 1200px) {
+  .cms-main { padding: 28px 16px 40px; }
+  .cms-card { padding: 20px 14px; }
+}
+
+@media (max-width: 1024px) {
+  .cms-shell {
+    grid-template-columns: 1fr;
+    grid-template-rows: 60px 1fr;
+    grid-template-areas:
+      "header"
+      "main";
+  }
+
+  .cms-menu-btn { display: inline-flex; align-items: center; justify-content: center; }
+
+  .cms-header { padding: 0 16px; }
+
+  .cms-header__user { font-size: 14px; max-width: 40vw; overflow: hidden; text-overflow: ellipsis; }
+
+  .cms-sidebar {
+    position: fixed;
+    top: 60px;
+    left: 0;
+    bottom: 0;
+    width: min(280px, 88vw);
+    transform: translateX(-100%);
+    transition: transform 0.2s ease;
+  }
+
+  .cms-sidebar.is-open { transform: translateX(0); }
+
+  .cms-backdrop {
+    display: block;
+    position: fixed;
+    inset: 60px 0 0 0;
+    border: none;
+    background: rgba(0, 0, 0, 0.35);
+    z-index: 24;
+    cursor: pointer;
+  }
+
+  .cms-main { padding: 24px 16px 32px; }
+
+  .mc-query__fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 768px) {
+  .cms-card { padding: 20px 16px; }
+  .mc-query__fields { grid-template-columns: 1fr; }
+  .mc-detail-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 480px) {
+  .cms-header__user { display: none; }
+}
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.26.9/babel.min.js"></script>
+
+  <script type="text/babel" data-cms="page">
+/* ══════════════════════════════════════════════════════════════
+   現買改資買 CMS 原型（方案 B：唯讀監控）
+   僅顯示線上改類申請紀錄；無審核、無電話案件、無 AS400 操作。
+   資料為前端假資料，查詢／匯出為前端模擬，未接後端 API。
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── ① 假資料：之後接 API 就換掉這個陣列 ────────────────────────
+   tradeDate/offsetDate/applyDate 用 YYYY-MM-DD，畫面顯示自動轉民國年。
+   fromType / toType： 現買 = cash、融資 = margin、融券 = short
+   lots：成交張數；toLots：更正後張數（可小於成交張數，表示只改部分張）
+   idNo：身分證字號（畫面欄位標為 ID）
+   status： approved 已通過、source 配額不足、error 系統錯誤、control 系統管制
+   單頁查詢；成交日期起迄預設為當日（BUSINESS_DATE），可擴大查詢歷史。
+   ※ 列唯一鍵為 id（如 R001），與身分證 idNo 不同。 */
+function todayIso() {
+  const d = new Date();
+  const pad = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+const BUSINESS_DATE = todayIso();
+
+const MOCK_ROWS = [
+  { id: 'R001', tradeDate: BUSINESS_DATE, applyDate: BUSINESS_DATE, orderNo: 'A0000112', idNo: 'A123456789', account: '6620980', accountName: '王小明', stockCode: '2330', stockName: '台積電',   side: 'B', lots: 5,  toLots: 3,  price: 1085.0, fromType: 'cash', toType: 'margin', offsetDate: BUSINESS_DATE, status: 'approved', reason: '' },
+  { id: 'R002', tradeDate: BUSINESS_DATE, applyDate: BUSINESS_DATE, orderNo: 'A0000118', idNo: 'B234567890', account: '6620981', accountName: '李美玲', stockCode: '2317', stockName: '鴻海',     side: 'B', lots: 12, toLots: 12, price: 214.5,  fromType: 'cash', toType: 'margin', offsetDate: BUSINESS_DATE, status: 'approved', reason: '' },
+  { id: 'R003', tradeDate: BUSINESS_DATE, applyDate: BUSINESS_DATE, orderNo: 'A0000121', idNo: 'C345678901', account: '6620982', accountName: '陳志豪', stockCode: '2454', stockName: '聯發科',   side: 'B', lots: 2,  toLots: 2,  price: 1420.0, fromType: 'cash', toType: 'margin', offsetDate: BUSINESS_DATE, status: 'approved', reason: '' },
+  { id: 'R004', tradeDate: BUSINESS_DATE, applyDate: BUSINESS_DATE, orderNo: 'A0000125', idNo: 'D456789012', account: '6620983', accountName: '林雅婷', stockCode: '2882', stockName: '國泰金',   side: 'B', lots: 20, toLots: 10, price: 68.9,   fromType: 'cash', toType: 'margin', offsetDate: BUSINESS_DATE, status: 'source',   reason: '配額不足' },
+  { id: 'R005', tradeDate: BUSINESS_DATE, applyDate: BUSINESS_DATE, orderNo: 'A0000128', idNo: 'E567890123', account: '6620984', accountName: '張建國', stockCode: '2603', stockName: '長榮',     side: 'B', lots: 8,  toLots: 8,  price: 196.0,  fromType: 'cash', toType: 'margin', offsetDate: BUSINESS_DATE, status: 'error',    reason: '系統錯誤' },
+  { id: 'R006', tradeDate: '2026-08-25', applyDate: '2026-08-25', orderNo: 'A0000103', idNo: 'F678901234', account: '6620985', accountName: '黃淑芬', stockCode: '2609', stockName: '陽明',     side: 'B', lots: 15, toLots: 8,  price: 84.3,   fromType: 'cash', toType: 'margin', offsetDate: '2026-08-25', status: 'approved', reason: '' },
+  { id: 'R007', tradeDate: '2026-08-24', applyDate: '2026-08-24', orderNo: 'A0000081', idNo: 'G789012345', account: '6620986', accountName: '吳俊傑', stockCode: '2412', stockName: '中華電',   side: 'B', lots: 6,  toLots: 6,  price: 132.5,  fromType: 'cash', toType: 'margin', offsetDate: '2026-08-24', status: 'approved', reason: '' },
+  { id: 'R008', tradeDate: '2026-08-24', applyDate: '2026-08-24', orderNo: 'A0000084', idNo: 'H890123456', account: '6620987', accountName: '蔡佩君', stockCode: '3008', stockName: '大立光',   side: 'B', lots: 1,  toLots: 1,  price: 2385.0, fromType: 'cash', toType: 'margin', offsetDate: '2026-08-24', status: 'source',   reason: '配額不足' },
+  { id: 'R009', tradeDate: '2026-08-24', applyDate: '2026-08-24', orderNo: 'A0000088', idNo: 'I901234567', account: '6620988', accountName: '劉承恩', stockCode: '2308', stockName: '台達電',   side: 'B', lots: 4,  toLots: 2,  price: 903.0,  fromType: 'cash', toType: 'margin', offsetDate: '2026-08-24', status: 'error',    reason: '系統錯誤' },
+  { id: 'R010', tradeDate: '2026-08-23', applyDate: '2026-08-23', orderNo: 'A0000072', idNo: 'J012345678', account: '6620989', accountName: '鄭文凱', stockCode: '2891', stockName: '中信金',   side: 'B', lots: 30, toLots: 20, price: 42.15,  fromType: 'cash', toType: 'margin', offsetDate: '2026-08-23', status: 'approved', reason: '' },
+  { id: 'R011', tradeDate: '2026-08-23', applyDate: '2026-08-23', orderNo: 'A0000075', idNo: 'K123456780', account: '6620990', accountName: '許佳慧', stockCode: '2303', stockName: '聯電',     side: 'B', lots: 25, toLots: 25, price: 58.7,   fromType: 'cash', toType: 'margin', offsetDate: '2026-08-23', status: 'control',  reason: '系統管制' },
+  { id: 'R012', tradeDate: '2026-08-23', applyDate: '2026-08-23', orderNo: 'A0000079', idNo: 'L234567801', account: '6620991', accountName: '周明哲', stockCode: '1301', stockName: '台塑',     side: 'B', lots: 10, toLots: 10, price: 44.6,   fromType: 'cash', toType: 'margin', offsetDate: '2026-08-23', status: 'approved', reason: '' },
+  { id: 'R013', tradeDate: '2026-08-22', applyDate: '2026-08-22', orderNo: 'A0000064', idNo: 'M345678012', account: '6620992', accountName: '楊雅雯', stockCode: '2002', stockName: '中鋼',     side: 'B', lots: 18, toLots: 12, price: 21.9,   fromType: 'cash', toType: 'margin', offsetDate: '2026-08-22', status: 'approved', reason: '' },
+  { id: 'R014', tradeDate: '2026-08-22', applyDate: '2026-08-22', orderNo: 'A0000068', idNo: 'N456780123', account: '6620993', accountName: '趙家豪', stockCode: '2357', stockName: '華碩',     side: 'B', lots: 3,  toLots: 1,  price: 682.0,  fromType: 'cash', toType: 'margin', offsetDate: '2026-08-22', status: 'control',  reason: '系統管制' },
+];
+
+/* ── ② 對照表：交易類別、買賣別、狀態 ─────────────────────────── */
+const TYPE_MAP = {
+  cash:   { label: '現買', className: 'mc-tag--cash' },
+  margin: { label: '融資', className: 'mc-tag--margin' },
+  short:  { label: '融券', className: 'mc-tag--short' },
+};
+
+const SIDE_MAP = { B: '買進 (B)', S: '賣出 (S)' };
+const SIDE_SHORT = { B: '買進', S: '賣出' };
+
+const STATUS_MAP = {
+  approved: { label: '已通過', className: 'mc-status--approved' },
+  source:   { label: '配額不足', className: 'mc-status--source' },
+  error:    { label: '系統錯誤', className: 'mc-status--error' },
+  control:  { label: '系統管制', className: 'mc-status--control' },
+};
+
+const PAGE_SIZE = 10;
+
+/* ── ③ 表格欄位定義：要加／刪／改欄位就改這裡 ──────────────────
+   key      對應資料欄位
+   label    表頭文字
+   sortable 是否可排序
+   render   自訂顯示（可省略）                                     */
+const COLUMNS = [
+  { key: 'tradeDate',  label: '成交日期',   sortable: true,  render: r => formatRocDate(r.tradeDate) },
+  { key: 'orderNo',    label: '委託書編號', sortable: true,  numeric: true },
+  { key: 'idNo',       label: 'ID',         sortable: true },
+  { key: 'account',    label: '委託人帳號', sortable: true,  numeric: true },
+  { key: 'accountName', label: '委託人姓名', sortable: true },
+  { key: 'stockName',  label: '股票名稱',   sortable: true,  className: 'mc-td--stock', render: r => <>{r.stockName}<br />({r.stockCode})</> },
+  { key: 'side',       label: 'B / S',      sortable: false, render: r => SIDE_SHORT[r.side] || r.side },
+  { key: 'lots',       label: '成交張數',   sortable: true,  numeric: true, render: r => formatNumber(r.lots) },
+  { key: 'price',      label: '單價',       sortable: true,  numeric: true, render: r => formatPrice(r.price) },
+  { key: 'fromType',   label: '成交類別',   sortable: false, render: r => <TypeTag type={r.fromType} /> },
+  { key: 'toLots',     label: '更正後張數', sortable: true,  numeric: true, render: r => formatNumber(r.toLots) },
+  { key: 'toType',     label: '更正後類別', sortable: false, render: r => <TypeTag type={r.toType} /> },
+  { key: 'offsetDate', label: '沖抵日期',   sortable: true,  render: r => formatRocDate(r.offsetDate) },
+  { key: 'status',     label: '狀態',       sortable: true,  render: r => <StatusPill status={r.status} /> },
+];
+
+/* ── ④ 查詢條件初始值（起迄預設當日）─────────────────────────── */
+const EMPTY_QUERY = {
+  dateStart: BUSINESS_DATE,
+  dateEnd: BUSINESS_DATE,
+  orderNo: '',
+  idNo: '',
+  account: '',
+  stock: '',
+  status: '',
+};
+
+/* ── 格式化工具 ───────────────────────────────────────────────── */
+function formatRocDate(iso) {
+  if (!iso) return '－';
+  const [y, m, d] = iso.split('-');
+  return `${Number(y) - 1911}/${m}/${d}`;
+}
+
+function formatNumber(n) {
+  return Number(n).toLocaleString('zh-TW');
+}
+
+function formatPrice(n) {
+  return Number(n).toLocaleString('zh-TW', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+/* ── 小元件 ───────────────────────────────────────────────────── */
+function Logo() {
+  return (
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>
+      <svg width="30" height="30" viewBox="0 0 30.66 29.99" fill="none" aria-hidden="true">
+        <path d="M 30.643 0.055 C 30.467 0.025 30.131 -0.02 29.764 0.01 C 27.042 0.131 25.068 2.26 25.068 4.932 L 25.068 15.003 C 25.068 15.51 25.028 16.022 24.952 16.524 C 24.661 18.428 23.832 20.206 22.546 21.662 C 22.33 21.909 22.084 22.155 21.778 22.436 C 21.226 22.943 20.633 23.38 20.015 23.732 C 18.493 24.611 16.755 25.073 14.992 25.073 L 14.902 25.073 C 13.551 25.053 12.28 24.787 11.085 24.279 C 10.698 24.114 10.321 23.928 9.97 23.727 C 9.538 23.481 9.126 23.194 8.734 22.888 C 8.267 22.516 7.83 22.104 7.438 21.657 C 7.413 21.627 7.393 21.602 7.368 21.572 C 5.781 19.714 4.917 17.388 4.917 14.997 L 4.917 8.132 C 4.917 6.389 6.334 4.952 8.081 4.927 L 25.108 4.927 L 25.108 3.189 C 25.108 1.431 23.682 0 21.919 0 L 6.384 0 C 6.057 0 5.741 0.025 5.424 0.07 C 2.667 0.487 0.487 2.667 0.07 5.424 C 0.025 5.736 0 6.057 0 6.384 L 0 15.038 C 0 18.664 1.291 21.989 3.43 24.576 C 4.033 25.299 4.701 25.967 5.424 26.57 C 5.681 26.786 5.952 26.986 6.223 27.182 C 6.263 27.212 6.303 27.243 6.344 27.268 C 6.605 27.454 6.876 27.629 7.147 27.795 C 7.197 27.825 7.248 27.855 7.298 27.885 C 7.574 28.051 7.855 28.207 8.147 28.358 C 8.187 28.378 8.232 28.398 8.272 28.418 C 8.88 28.724 9.513 28.985 10.166 29.206 C 10.211 29.221 10.256 29.237 10.301 29.252 C 10.613 29.352 10.934 29.448 11.256 29.528 C 11.311 29.543 11.366 29.558 11.421 29.568 C 11.748 29.648 12.074 29.719 12.411 29.774 C 12.456 29.779 12.496 29.789 12.541 29.794 C 12.893 29.849 13.245 29.9 13.601 29.93 C 14.048 29.97 14.5 29.99 14.957 29.99 C 18.614 29.99 21.964 28.684 24.571 26.514 C 25.279 25.927 25.932 25.274 26.519 24.566 C 28.689 21.959 29.995 18.609 29.995 14.952 L 29.995 2.943 C 29.995 2.943 29.89 0.929 30.648 0.11 C 30.668 0.09 30.663 0.06 30.638 0.055 L 30.643 0.055 Z" fill="rgb(230,0,57)" />
+        <g transform="translate(7.539 6.605)">
+          <path d="M 0 2.175 L 0 7.037 L 4.018 7.037 C 5.188 7.037 6.133 6.062 6.133 4.862 L 6.133 0 L 2.115 0 C 0.944 0 0 0.974 0 2.175 Z M 4.455 1.582 L 4.455 4.36 C 4.455 4.962 3.983 5.45 3.395 5.45 L 1.678 5.45 L 1.678 2.672 C 1.678 2.069 2.15 1.582 2.737 1.582 L 4.455 1.582 Z" fill="#fff" />
+          <path d="M 2.366 9.282 L 4.817 9.282 L 4.817 3.24 C 5.515 2.411 6.082 1.331 6.519 0 L 4.018 0 C 3.275 2.175 1.939 3.692 0 4.556 L 0 5.987 C 0.829 5.766 1.617 5.475 2.366 5.113 L 2.366 9.277 L 2.366 9.282 Z" fill="#fff" transform="translate(8.433 0)" />
+        </g>
+      </svg>
+      <span style={{ fontSize: 17, fontWeight: 500, letterSpacing: 2, color: 'rgb(230,0,57)' }}>口袋證券</span>
+    </span>
+  );
+}
+
+function TypeTag({ type }) {
+  const t = TYPE_MAP[type];
+  if (!t) return <span>－</span>;
+  return <span className={`mc-tag ${t.className}`}>{t.label}</span>;
+}
+
+function StatusPill({ status }) {
+  const s = STATUS_MAP[status] || STATUS_MAP.approved;
+  return <span className={`mc-status ${s.className}`}>{s.label}</span>;
+}
+
+function SortHeader({ column, sort, onSort }) {
+  if (!column.sortable) return <span>{column.label}</span>;
+  const active = sort.key === column.key;
+  return (
+    <button type="button" className="mc-sort" onClick={() => onSort(column.key)}>
+      <span>{column.label}</span>
+      <span className="mc-sort__arrows" aria-hidden="true">
+        <span className={'mc-sort__arrow' + (active && sort.dir === 'asc' ? ' is-active' : '')}>▲</span>
+        <span className={'mc-sort__arrow' + (active && sort.dir === 'desc' ? ' is-active' : '')}>▼</span>
+      </span>
+    </button>
+  );
+}
+
+function Pagination({ page, totalItems, onChange }) {
+  const totalPages = Math.max(1, Math.ceil(totalItems / PAGE_SIZE));
+  const pages = [];
+  for (let i = 1; i <= totalPages; i += 1) pages.push(i);
+  return (
+    <nav className="mc-pagination" aria-label="分頁">
+      <button type="button" className="mc-pagination__btn" disabled={page <= 1} onClick={() => onChange(page - 1)} aria-label="上一頁">‹</button>
+      {pages.map(p => (
+        <button
+          key={p}
+          type="button"
+          className={'mc-pagination__btn' + (p === page ? ' is-active' : '')}
+          onClick={() => p !== page && onChange(p)}
+          aria-current={p === page ? 'page' : undefined}
+        >{p}</button>
+      ))}
+      <button type="button" className="mc-pagination__btn" disabled={page >= totalPages} onClick={() => onChange(page + 1)} aria-label="下一頁">›</button>
+      <span className="mc-pagination__info">共 {formatNumber(totalItems)} 筆</span>
+    </nav>
+  );
+}
+
+/* ── CMS 外殼 ─────────────────────────────────────────────────── */
+const SIDEBAR_GROUPS = [
+  { id: 'home',   label: '首頁',     children: [] },
+  { id: 'review', label: '審核',     children: [
+    { id: 'review/open',  label: '線上開通申請' },
+    { id: 'review/happy', label: 'Happy Call 名單' },
+  ] },
+  { id: 'cust',   label: '客戶管理', children: [
+    { id: 'cust/list', label: '客戶清單' },
+    { id: 'cust/edit', label: '修改用戶資料' },
+  ] },
+  { id: 'goods',  label: '商品檔',   children: [] },
+  { id: 'push',   label: '推播訊息', children: [] },
+  { id: 'ops',    label: '營運管理', children: [
+    { id: 'ops/upload',              label: '折抵資料上傳' },
+    { id: 'ops/query',               label: '折抵活動查詢' },
+    { id: 'ops/day-trading-buyback', label: '券差出借專區' },
+    { id: 'ops/margin-change',       label: '現買改資買' },
+    { id: 'ops/staff',               label: '員工資料管理' },
+  ] },
+  { id: 'perm',   label: '權限管理', children: [] },
+  { id: 'mkt',    label: '行銷專區', children: [] },
+  { id: 'site',   label: '官網專區', children: [] },
+  { id: 'sign',   label: '簽核管理', children: [] },
+  { id: 'me',     label: '個人設定', children: [] },
+];
+
+const ACTIVE_NAV = 'ops/margin-change';
+
+function Shell({ children }) {
+  const [menuOpen, setMenuOpen] = React.useState(false);
+
+  return (
+    <div className="cms-shell">
+      {menuOpen && (
+        <button type="button" className="cms-backdrop" aria-label="關閉選單" onClick={() => setMenuOpen(false)} />
+      )}
+      <header className="cms-header">
+        <button type="button" className="cms-menu-btn" aria-label="開啟選單" onClick={() => setMenuOpen(o => !o)}>☰</button>
+        <Logo />
+        <div style={{ flex: 1 }} />
+        <span className="cms-header__user">產品部部員 pk225，您好</span>
+        <button type="button" className="cms-header__logout">登出</button>
+      </header>
+
+      <nav className={'cms-sidebar' + (menuOpen ? ' is-open' : '')}>
+        {SIDEBAR_GROUPS.map(g => (
+          <React.Fragment key={g.id}>
+            <button type="button" className="cms-nav-group">{g.label}</button>
+            {ACTIVE_NAV.startsWith(g.id + '/') && g.children.map(c => (
+              <button
+                key={c.id}
+                type="button"
+                className={'cms-nav-item' + (c.id === ACTIVE_NAV ? ' is-active' : '')}
+              >{c.label}</button>
+            ))}
+          </React.Fragment>
+        ))}
+      </nav>
+
+      <main className="cms-main">{children}</main>
+    </div>
+  );
+}
+
+/* ── 主頁面 ───────────────────────────────────────────────────── */
+function MarginChangePage() {
+  const [rows] = React.useState(MOCK_ROWS);
+  const [draftQuery, setDraftQuery] = React.useState(EMPTY_QUERY);
+  const [query, setQuery] = React.useState(EMPTY_QUERY);
+  const [sort, setSort] = React.useState({ key: 'tradeDate', dir: 'desc' });
+  const [page, setPage] = React.useState(1);
+  const [notice, setNotice] = React.useState('');
+
+  const setField = (key, value) => setDraftQuery(q => ({ ...q, [key]: value }));
+
+  const filtered = React.useMemo(() => {
+    const keyword = query.stock.trim().toLowerCase();
+    return rows.filter(r => {
+      if (query.dateStart && r.tradeDate < query.dateStart) return false;
+      if (query.dateEnd && r.tradeDate > query.dateEnd) return false;
+      if (query.orderNo && !r.orderNo.toLowerCase().includes(query.orderNo.trim().toLowerCase())) return false;
+      if (query.idNo && !(r.idNo || '').toUpperCase().includes(query.idNo.trim().toUpperCase())) return false;
+      if (query.account && !r.account.includes(query.account.trim())) return false;
+      if (keyword && !(r.stockName.toLowerCase().includes(keyword) || r.stockCode.includes(keyword))) return false;
+      if (query.status && r.status !== query.status) return false;
+      return true;
+    });
+  }, [rows, query]);
+
+  const sorted = React.useMemo(() => {
+    const list = [...filtered];
+    list.sort((a, b) => {
+      const av = a[sort.key];
+      const bv = b[sort.key];
+      let cmp;
+      if (typeof av === 'number' && typeof bv === 'number') cmp = av - bv;
+      else cmp = String(av).localeCompare(String(bv), 'zh-Hant');
+      return sort.dir === 'asc' ? cmp : -cmp;
+    });
+    return list;
+  }, [filtered, sort]);
+
+  const totalPages = Math.max(1, Math.ceil(sorted.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const pageRows = sorted.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+
+  const runSearch = () => {
+    setQuery(draftQuery);
+    setPage(1);
+    setNotice('');
+  };
+
+  const clearQuery = () => {
+    setDraftQuery(EMPTY_QUERY);
+    setQuery(EMPTY_QUERY);
+    setPage(1);
+    setNotice('');
+  };
+
+  const toggleSort = key => {
+    setSort(s => (s.key === key ? { key, dir: s.dir === 'asc' ? 'desc' : 'asc' } : { key, dir: 'asc' }));
+  };
+
+  const exportCsv = () => {
+    const cellValue = (c, r) => {
+      if (c.key === 'tradeDate' || c.key === 'offsetDate') return formatRocDate(r[c.key]);
+      if (c.key === 'stockName') return `${r.stockName} (${r.stockCode})`;
+      if (c.key === 'side') return SIDE_MAP[r.side] || r.side;
+      if (c.key === 'lots' || c.key === 'toLots') return r[c.key];
+      if (c.key === 'price') return formatPrice(r.price);
+      if (c.key === 'fromType' || c.key === 'toType') return TYPE_MAP[r[c.key]].label;
+      if (c.key === 'status') return STATUS_MAP[r.status].label;
+      return r[c.key] ?? '';
+    };
+    const header = [...COLUMNS.map(c => c.label), '原因說明'];
+    const lines = sorted.map(r => ([
+      ...COLUMNS.map(c => cellValue(c, r)),
+      r.reason || '',
+    ]));
+    const csv = [header, ...lines]
+      .map(cols => cols.map(v => `"${String(v).replace(/"/g, '""')}"`).join(','))
+      .join('\r\n');
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `現買改資買_${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    setNotice(`已匯出 ${sorted.length} 筆資料`);
+  };
+
+  return (
+    <div className="cms-card">
+      <h1 className="mc-page-title">現買改資買</h1>
+
+      {notice && <div className="mc-notice" role="status">{notice}</div>}
+
+      {/* 查詢條件 */}
+      <div className="mc-query">
+        <span className="mc-query__title">查詢條件</span>
+        <div className="mc-query__fields">
+          <label className="mc-query__field">
+            <span>成交日期（起）</span>
+            <input type="date" value={draftQuery.dateStart} onChange={e => setField('dateStart', e.target.value)} />
+          </label>
+          <label className="mc-query__field">
+            <span>成交日期（迄）</span>
+            <input type="date" value={draftQuery.dateEnd} onChange={e => setField('dateEnd', e.target.value)} />
+          </label>
+          <label className="mc-query__field">
+            <span>委託書編號</span>
+            <input type="text" value={draftQuery.orderNo} onChange={e => setField('orderNo', e.target.value)} placeholder="輸入委託書編號" />
+          </label>
+          <label className="mc-query__field">
+            <span>ID</span>
+            <input type="text" value={draftQuery.idNo} onChange={e => setField('idNo', e.target.value)} placeholder="身分證字號" maxLength={10} />
+          </label>
+          <label className="mc-query__field">
+            <span>委託人帳號</span>
+            <input type="text" value={draftQuery.account} onChange={e => setField('account', e.target.value)} placeholder="台股帳號 7 碼" maxLength={7} />
+          </label>
+          <label className="mc-query__field">
+            <span>股票名稱／代號</span>
+            <input type="text" value={draftQuery.stock} onChange={e => setField('stock', e.target.value)} placeholder="例：台積電 或 2330" />
+          </label>
+          <label className="mc-query__field">
+            <span>狀態</span>
+            <select value={draftQuery.status} onChange={e => setField('status', e.target.value)}>
+              <option value="">全部</option>
+              <option value="approved">已通過</option>
+              <option value="source">配額不足</option>
+              <option value="error">系統錯誤</option>
+              <option value="control">系統管制</option>
+            </select>
+          </label>
+        </div>
+        <div className="mc-query__actions">
+          <button type="button" className="mc-btn mc-btn--plain" onClick={clearQuery}>清除</button>
+          <button type="button" className="mc-btn mc-btn--primary" onClick={runSearch}>查詢</button>
+          <button type="button" className="mc-btn mc-btn--primary" onClick={exportCsv} disabled={sorted.length === 0}>匯出名單</button>
+        </div>
+      </div>
+
+      {/* 工具列 */}
+      <div className="mc-toolbar">
+        <div className="mc-toolbar__meta">
+          <span>符合 <strong>{formatNumber(filtered.length)}</strong> 筆</span>
+        </div>
+        <div className="mc-toolbar__meta">
+          <span>營業日：{formatRocDate(BUSINESS_DATE)}（預設查詢當日）</span>
+        </div>
+      </div>
+
+      {/* 名單表格 */}
+      <div className="mc-table-wrap">
+        <table>
+          <thead>
+            <tr>
+              {COLUMNS.map(c => (
+                <th key={c.key} className="mc-th">
+                  <SortHeader column={c} sort={sort} onSort={toggleSort} />
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {pageRows.map((r, i) => (
+              <tr
+                key={r.id}
+                className={i % 2 === 0 ? 'mc-tr--odd' : 'mc-tr--even'}
+              >
+                {COLUMNS.map(c => (
+                  <td key={c.key} className={'mc-td' + (c.numeric ? ' mc-td--num' : '') + (c.className ? ' ' + c.className : '')}>
+                    {c.render ? c.render(r) : r[c.key]}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {pageRows.length === 0 && <div className="mc-empty">查無符合條件的資料</div>}
+      </div>
+
+      <Pagination page={currentPage} totalItems={sorted.length} onChange={setPage} />
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <Shell>
+      <MarginChangePage />
+    </Shell>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
