@@ -299,12 +299,15 @@ button, input, select { font-family: inherit; }
 .cr-tabs[hidden] { display: none; }
 
 #view-apply .cr-table thead th:nth-child(3),
+#view-apply .cr-table thead th:nth-child(4),
 #view-apply .cr-table thead th:nth-child(5),
 #view-apply .cr-table tbody td:nth-child(3),
+#view-apply .cr-table tbody td:nth-child(4),
 #view-apply .cr-table tbody td:nth-child(5) {
   text-align: center;
 }
-#view-apply .cr-table thead th:nth-child(3) .cr-sort {
+#view-apply .cr-table thead th:nth-child(3) .cr-sort,
+#view-apply .cr-table thead th:nth-child(4) .cr-sort {
   justify-content: center;
   width: 100%;
 }
@@ -322,6 +325,50 @@ button, input, select { font-family: inherit; }
 }
 .cr-status--approved { background: #E8F6EE; color: #1B7A3A; }
 .cr-status--source { background: var(--pkt-pink-50); color: var(--pkt-red-main); }
+.cr-status--error { background: #F3E8FF; color: #6B21A8; }
+.cr-status--control { background: #FFF4E5; color: #B45309; }
+
+.demo-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 300; /* 須高於 .pkt-modal(200)，提示開啟後仍可操作 Demo 列 */
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+  padding: 10px 40px;
+  background: #1F2937;
+  color: #F9FAFB;
+  font-size: 13px;
+  pointer-events: auto;
+}
+.demo-bar label { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.demo-bar select, .demo-bar button {
+  height: 30px;
+  border-radius: 6px;
+  border: 1px solid #4B5563;
+  background: #111827;
+  color: #F9FAFB;
+  font-size: 13px;
+  padding: 0 10px;
+  pointer-events: auto;
+  position: relative;
+  z-index: 1;
+}
+.demo-bar button {
+  background: var(--pkt-red-main);
+  border-color: var(--pkt-red-main);
+  cursor: pointer;
+  font-weight: 600;
+}
+.demo-bar button:hover { background: var(--pkt-red-hover); }
+.demo-bar__hint { color: #9CA3AF; }
+body.has-demo-bar {
+  padding-top: var(--demo-bar-h, 50px);
+}
+body.has-demo-bar .pkt-header { top: var(--demo-bar-h, 50px); }
 
 #view-empty .pkt-panel {
   border-radius: var(--pkt-r-xl);
@@ -689,7 +736,29 @@ button, input, select { font-family: inherit; }
 }
   </style>
 </head>
-<body>
+<body class="has-demo-bar">
+  <div class="demo-bar" id="demo-bar" role="region" aria-label="Demo 提示控制">
+    <strong>Demo 控制</strong>
+    <label>進場提示
+      <select id="demo-notice">
+        <option value="convert">可辦理（確認）</option>
+        <option value="credit">未開信用戶（直轉加開）</option>
+        <option value="quota">融資餘額不足</option>
+        <option value="none">不跳出</option>
+      </select>
+    </label>
+    <label>送出結果
+      <select id="demo-submit">
+        <option value="success">成功</option>
+        <option value="source">配額不足</option>
+        <option value="network">連線異常／系統錯誤</option>
+        <option value="control">系統管制</option>
+      </select>
+    </label>
+    <button type="button" id="demo-trigger-notice">立即跳出提示</button>
+    <button type="button" id="demo-apply">寫入網址並重載</button>
+    <span class="demo-bar__hint">切換下拉即生效；不隨機。亦可 ?notice= / ?submit=</span>
+  </div>
   <header class="pkt-header">
     <button type="button" class="pkt-mobile-menu" aria-label="開啟選單">☰</button>
     <a href="#" class="pkt-brand" aria-label="口袋證券">
@@ -725,9 +794,10 @@ button, input, select { font-family: inherit; }
           <table class="cr-table">
             <thead id="thead">
               <tr>
+                <th><button type="button" class="cr-sort" data-sort="orderNo">委託書號 <span class="cr-sort__arrows"><span data-dir="asc">▲</span><span data-dir="desc">▼</span></span></button></th>
                 <th><button type="button" class="cr-sort" data-sort="name">股票名稱 <span class="cr-sort__arrows"><span data-dir="asc">▲</span><span data-dir="desc">▼</span></span></button></th>
                 <th><button type="button" class="cr-sort" data-sort="price">單價 <span class="cr-sort__arrows"><span data-dir="asc">▲</span><span data-dir="desc">▼</span></span></button></th>
-                <th><button type="button" class="cr-sort" data-sort="lots">可改類張數 <span class="cr-sort__arrows"><span data-dir="asc">▲</span><span data-dir="desc">▼</span></span></button></th>
+                <th><button type="button" class="cr-sort" data-sort="lots">今日整股成交張數 <span class="cr-sort__arrows"><span data-dir="asc">▲</span><span data-dir="desc">▼</span></span></button></th>
                 <th>改資買張數</th>
                 <th>預估融資金額</th>
               </tr>
@@ -771,6 +841,8 @@ button, input, select { font-family: inherit; }
                   <option value="">全部</option>
                   <option value="approved">已通過</option>
                   <option value="source">配額不足</option>
+                  <option value="error">系統錯誤</option>
+                  <option value="control">系統管制</option>
                 </select>
               </label>
             </div>
@@ -788,7 +860,7 @@ button, input, select { font-family: inherit; }
                 <th><button type="button" class="cr-sort" data-sort="date">申請日期 <span class="cr-sort__arrows"><span data-dir="asc">▲</span><span data-dir="desc">▼</span></span></button></th>
                 <th><button type="button" class="cr-sort" data-sort="name">股票名稱 <span class="cr-sort__arrows"><span data-dir="asc">▲</span><span data-dir="desc">▼</span></span></button></th>
                 <th><button type="button" class="cr-sort" data-sort="price">單價 <span class="cr-sort__arrows"><span data-dir="asc">▲</span><span data-dir="desc">▼</span></span></button></th>
-                <th><button type="button" class="cr-sort" data-sort="lots">可改類張數 <span class="cr-sort__arrows"><span data-dir="asc">▲</span><span data-dir="desc">▼</span></span></button></th>
+                <th><button type="button" class="cr-sort" data-sort="lots">今日整股成交張數 <span class="cr-sort__arrows"><span data-dir="asc">▲</span><span data-dir="desc">▼</span></span></button></th>
                 <th>改資買張數</th>
                 <th><button type="button" class="cr-sort" data-sort="status">狀態 <span class="cr-sort__arrows"><span data-dir="asc">▲</span><span data-dir="desc">▼</span></span></button></th>
               </tr>
@@ -813,7 +885,7 @@ button, input, select { font-family: inherit; }
       <p class="pkt-modal__title" id="notice-title">提示</p>
       <div class="pkt-modal__body" id="notice-body"></div>
       <div class="pkt-modal__actions">
-        <button type="button" class="pkt-modal__btn pkt-modal__btn--cancel" id="notice-cancel">取消</button>
+        <button type="button" class="pkt-modal__btn pkt-modal__btn--cancel" id="notice-cancel">回到上一頁</button>
         <button type="button" class="pkt-modal__btn pkt-modal__btn--submit" id="notice-ok">前往變更</button>
       </div>
     </div>
@@ -828,8 +900,9 @@ button, input, select { font-family: inherit; }
         <table class="cr-summary">
           <thead>
             <tr>
+              <th>委託書號</th>
               <th>股票名稱</th>
-              <th>可改類張數</th>
+              <th>今日整股成交張數</th>
               <th>改資買張數</th>
               <th>預估融資金額</th>
             </tr>
@@ -837,7 +910,7 @@ button, input, select { font-family: inherit; }
           <tbody id="confirm-body"></tbody>
           <tfoot>
             <tr>
-              <td colspan="4" id="confirm-total"></td>
+              <td colspan="5" id="confirm-total"></td>
             </tr>
           </tfoot>
         </table>
@@ -852,39 +925,39 @@ button, input, select { font-family: inherit; }
 
   <script>
 (function () {
-  var STORAGE_KEY = 'pkt-reclass-records-v5';
+  var STORAGE_KEY = 'pkt-reclass-records-v6';
   var SEED_RECORDS = [
     { id: 'R1',  date: '2026/09/10', code: '2330',  name: '台積電',         price: 1085,  lots: 2,  convert: 1,  status: 'approved' },
     { id: 'R2',  date: '2026/09/09', code: '00712', name: '復華富時不動產', price: 22.15, lots: 5,  convert: 3,  status: 'source' },
     { id: 'R3',  date: '2026/09/08', code: '2317',  name: '鴻海',           price: 214.5, lots: 12, convert: 4,  status: 'approved' },
-    { id: 'R4',  date: '2026/09/07', code: '2454',  name: '聯發科',         price: 1420,  lots: 2,  convert: 2,  status: 'approved' },
+    { id: 'R4',  date: '2026/09/07', code: '2454',  name: '聯發科',         price: 1420,  lots: 2,  convert: 2,  status: 'error' },
     { id: 'R5',  date: '2026/09/06', code: '2303',  name: '聯電',           price: 58.7,  lots: 25, convert: 10, status: 'source' },
     { id: 'R6',  date: '2026/09/05', code: '2882',  name: '國泰金',         price: 68.9,  lots: 20, convert: 8,  status: 'approved' },
-    { id: 'R7',  date: '2026/09/04', code: '2603',  name: '長榮',           price: 196,   lots: 8,  convert: 5,  status: 'approved' },
+    { id: 'R7',  date: '2026/09/04', code: '2603',  name: '長榮',           price: 196,   lots: 8,  convert: 5,  status: 'control' },
     { id: 'R8',  date: '2026/09/03', code: '2412',  name: '中華電',         price: 132.5, lots: 6,  convert: 6,  status: 'source' },
     { id: 'R9',  date: '2026/09/02', code: '3008',  name: '大立光',         price: 2385,  lots: 1,  convert: 1,  status: 'approved' },
     { id: 'R10', date: '2026/09/01', code: '2308',  name: '台達電',         price: 903,   lots: 4,  convert: 2,  status: 'approved' },
-    { id: 'R11', date: '2026/08/29', code: '2891',  name: '中信金',         price: 42.15, lots: 30, convert: 15, status: 'source' },
-    { id: 'R12', date: '2026/08/28', code: '2357',  name: '華碩',           price: 682,   lots: 3,  convert: 1,  status: 'approved' }
+    { id: 'R11', date: '2026/08/29', code: '2891',  name: '中信金',         price: 42.15, lots: 30, convert: 15, status: 'error' },
+    { id: 'R12', date: '2026/08/28', code: '2357',  name: '華碩',           price: 682,   lots: 3,  convert: 1,  status: 'control' }
   ];
   var APPLY_ROWS = [
-    { id: 'M1', code: '00712', name: '復華富時不動產', lots: 5,  price: 22.15 },
-    { id: 'M2', code: '00687B', name: '國泰20年美債',   lots: 10, price: 32.08 },
-    { id: 'M3', code: '00712', name: '復華富時不動產', lots: 8,  price: 21.90 },
-    { id: 'M4', code: '00687B', name: '國泰20年美債',   lots: 3,  price: 31.96 },
-    { id: 'M5', code: '2330',  name: '台積電',         lots: 2,  price: 1085 },
-    { id: 'M6', code: '2317',  name: '鴻海',           lots: 12, price: 214.5 }
+    { id: 'M1', orderNo: 'A0001011', code: '00712', name: '復華富時不動產', lots: 5,  price: 22.15 },
+    { id: 'M2', orderNo: 'A0001012', code: '00687B', name: '國泰20年美債',   lots: 10, price: 32.08 },
+    { id: 'M3', orderNo: 'A0001015', code: '00712', name: '復華富時不動產', lots: 8,  price: 21.90 },
+    { id: 'M4', orderNo: 'A0001018', code: '00687B', name: '國泰20年美債',   lots: 3,  price: 31.96 },
+    { id: 'M5', orderNo: 'A0001020', code: '2330',  name: '台積電',         lots: 2,  price: 1085 },
+    { id: 'M6', orderNo: 'A0001024', code: '2317',  name: '鴻海',           lots: 12, price: 214.5 }
   ];
 
   var keyword = '';
-  var sortKey = 'name';
+  var sortKey = 'orderNo';
   var sortDir = 'asc';
   var convertQty = {};
   var pageLocked = false;
   var submitting = false;
   var CLIENT_MARGIN_LIMIT = 2000000;
   var SHARES_PER_LOT = 1000;
-  var CREDIT_OPEN_URL = '#';
+  var CREDIT_OPEN_URL = 'https://www.labpocket.tw/openaccountonline/oa/login/existing';
   var QUOTA_APPLY_URL = '#';
   var PORTAL_URL = 'https://www.pocket.tw/';
   var MARGIN_BALANCE = (function () {
@@ -892,11 +965,19 @@ button, input, select { font-family: inherit; }
     var n = q == null || q === '' ? 12800 : Number(q);
     return isNaN(n) ? 12800 : n;
   })();
-  var NOTICE_TYPES = ['credit', 'quota', 'convert'];
+  var NOTICE_TYPES = ['credit', 'quota', 'convert', 'none'];
+  var params = new URLSearchParams(window.location.search);
   var NOTICE_TYPE = (function () {
-    var q = new URLSearchParams(window.location.search).get('notice');
+    var q = params.get('notice');
     if (NOTICE_TYPES.indexOf(q) !== -1) return q;
-    return NOTICE_TYPES[Math.floor(Math.random() * NOTICE_TYPES.length)];
+    return 'convert';
+  })();
+  var SUBMIT_TYPE = (function () {
+    var q = params.get('submit');
+    if (q === 'network' || q === 'error') return 'network';
+    if (q === 'control') return 'control';
+    if (q === 'source' || q === 'success') return q;
+    return 'success';
   })();
   var activeNotice = NOTICE_TYPE;
 
@@ -908,8 +989,18 @@ button, input, select { font-family: inherit; }
   var recSortDir = 'desc';
   var REC_PAGE_SIZE = 10;
   var recPage = 1;
-  var STATUS = { approved: '已通過', source: '配額不足' };
-  var STATUS_CLASS = { approved: 'cr-status--approved', source: 'cr-status--source' };
+  var STATUS = {
+    approved: '已通過',
+    source: '配額不足',
+    error: '系統錯誤',
+    control: '系統管制'
+  };
+  var STATUS_CLASS = {
+    approved: 'cr-status--approved',
+    source: 'cr-status--source',
+    error: 'cr-status--error',
+    control: 'cr-status--control'
+  };
   var recThead = document.getElementById('records-thead');
   var recTbody = document.getElementById('records-tbody');
   var recPagination = document.getElementById('records-pagination');
@@ -960,12 +1051,15 @@ button, input, select { font-family: inherit; }
   function remainingQuota() {
     return CLIENT_MARGIN_LIMIT - Math.round(totalEstimate());
   }
+  function remainingLots(r) {
+    return Math.max(0, r.lots - getQty(r.id));
+  }
   function renderTotals() {
     var total = Math.round(totalEstimate());
     var remain = remainingQuota();
     var remainClass = remain < 0 ? 'cr-num-warn' : 'cr-num-red';
     tfoot.innerHTML =
-      '<tr' + (remain < 0 ? ' class="is-over"' : '') + '><td colspan="5">本次預估融資 <span class="cr-num-red">' + formatMoney(total) +
+      '<tr' + (remain < 0 ? ' class="is-over"' : '') + '><td colspan="6">本次預估融資 <span class="cr-num-red">' + formatMoney(total) +
       '</span> 元，申請後剩餘額度 <span class="' + remainClass + '">' + formatMoney(remain) +
       '</span> 元</td></tr>';
   }
@@ -1000,6 +1094,7 @@ button, input, select { font-family: inherit; }
     list.sort(function (a, b) {
       var cmp;
       if (sortKey === 'name') cmp = (a.code + a.name).localeCompare(b.code + b.name, 'zh-Hant');
+      else if (sortKey === 'orderNo') cmp = String(a.orderNo).localeCompare(String(b.orderNo), 'zh-Hant');
       else cmp = a[sortKey] - b[sortKey];
       return sortDir === 'asc' ? cmp : -cmp;
     });
@@ -1012,9 +1107,10 @@ button, input, select { font-family: inherit; }
     btnNext.disabled = pageLocked || submitting || readyItems().length === 0;
   }
   function normalizeRecordStatus(status) {
-    if (status === 'approved' || status === 'source') return status;
+    if (status === 'approved' || status === 'source' || status === 'error' || status === 'control') return status;
     if (status === 'applied') return 'approved';
-    if (status === 'quota' || status === 'other') return 'source';
+    if (status === 'quota' || status === 'other' || status === 'failed') return 'source';
+    if (status === 'network') return 'error';
     return 'approved';
   }
   function loadRecords() {
@@ -1136,7 +1232,7 @@ button, input, select { font-family: inherit; }
   function exportRecordsCsv() {
     var rows = recCurrentRows();
     if (!rows.length) return;
-    var header = ['申請日期', '股票代號', '股票名稱', '單價', '可改類張數', '改資買張數', '狀態'];
+    var header = ['申請日期', '股票代號', '股票名稱', '單價', '今日整股成交張數', '改資買張數', '狀態'];
     var lines = rows.map(function (r) {
       return [
         r.date,
@@ -1216,7 +1312,7 @@ button, input, select { font-family: inherit; }
     });
     var rows = currentRows();
     if (!rows.length) {
-      tbody.innerHTML = '<tr><td class="cr-empty" colspan="5">查無符合的資料</td></tr>';
+      tbody.innerHTML = '<tr><td class="cr-empty" colspan="6">查無符合的資料</td></tr>';
       renderTotals();
       syncNext();
       return;
@@ -1225,9 +1321,10 @@ button, input, select { font-family: inherit; }
       var qty = getQty(r.id);
       return (
         '<tr class="cr-row' + (qty > 0 ? ' is-selected' : '') + '" data-id="' + r.id + '">' +
+          '<td>' + r.orderNo + '</td>' +
           '<td class="cr-name-cell">' + r.code + ' ' + r.name + '</td>' +
           '<td>' + formatPrice(r.price) + '</td>' +
-          '<td>' + r.lots.toLocaleString('zh-TW') + '</td>' +
+          '<td class="cr-remain-lots" data-remain="' + r.id + '">' + remainingLots(r).toLocaleString('zh-TW') + '</td>' +
           '<td>' + stepperHtml(r) + '</td>' +
           '<td class="cr-est" data-est="' + r.id + '">' + formatMoney(Math.round(estimateAmount(r))) + '</td>' +
         '</tr>'
@@ -1248,7 +1345,9 @@ button, input, select { font-family: inherit; }
     wrap.closest('tr').classList.toggle('is-selected', qty > 0);
     var row = findRow(id);
     var est = wrap.closest('tr').querySelector('[data-est]');
+    var remainCell = wrap.closest('tr').querySelector('[data-remain]');
     if (row && est) est.textContent = formatMoney(Math.round(estimateAmount(row)));
+    if (row && remainCell) remainCell.textContent = remainingLots(row).toLocaleString('zh-TW');
     renderTotals();
     syncNext();
   }
@@ -1348,7 +1447,7 @@ button, input, select { font-family: inherit; }
     }
     confirmBody.innerHTML = items.map(function (r) {
       var qty = getQty(r.id);
-      return '<tr><td>' + r.code + ' ' + r.name + '</td><td>' + r.lots + '</td><td>' + qty + '</td><td>' + formatMoney(Math.round(estimateAmount(r))) + '</td></tr>';
+      return '<tr><td>' + r.orderNo + '</td><td>' + r.code + ' ' + r.name + '</td><td>' + r.lots + '</td><td>' + qty + '</td><td>' + formatMoney(Math.round(estimateAmount(r))) + '</td></tr>';
     }).join('');
     var confirmTotal = Math.round(totalEstimate());
     var remain = remainingQuota();
@@ -1380,7 +1479,7 @@ button, input, select { font-family: inherit; }
     notice.classList.toggle('is-single', !show);
     noticeCancel.hidden = !show;
   }
-  function showSubmitResultNotice(type) {
+  function showSubmitResultNotice(type, shortageItems) {
     activeNotice = 'submit-' + type;
     setNoticeCancelVisible(false);
     noticeTitle.textContent = '提示';
@@ -1389,12 +1488,22 @@ button, input, select { font-family: inherit; }
       noticeBody.innerHTML =
         '<p class="pkt-modal__notice">已成功送出申請，請稍等5分鐘後至申請紀錄及口袋台股確認</p>';
     } else if (type === 'source') {
+      var names = (shortageItems || []).map(function (r) {
+        return r.code + ' ' + r.name;
+      });
+      var unique = names.filter(function (n, i) { return names.indexOf(n) === i; });
+      var stockText = unique.length ? unique.join('、') : '（標的未指定）';
       noticeBody.innerHTML =
-        '<p class="pkt-modal__notice">配額不足，請於T+2日確認交割帳戶有足額交割款</p>' +
+        '<p class="pkt-modal__notice pkt-modal__notice--alert">配額不足標的：' + stockText + '</p>' +
+        '<p class="pkt-modal__notice">請於T+2日確認交割帳戶有足額交割款</p>' +
         '<p class="pkt-modal__notice">若有問題，請於服務時間致電客服：<a href="tel:0809-089-001">0809-089-001</a></p>';
     } else if (type === 'network') {
       noticeBody.innerHTML =
-        '<p class="pkt-modal__notice">連線異常，請稍後5分鐘再次申請</p>' +
+        '<p class="pkt-modal__notice">系統錯誤／連線異常，請稍後5分鐘再次申請</p>' +
+        '<p class="pkt-modal__notice">若有問題，請於服務時間致電客服：<a href="tel:0809-089-001">0809-089-001</a></p>';
+    } else if (type === 'control') {
+      noticeBody.innerHTML =
+        '<p class="pkt-modal__notice">系統管制中，目前無法完成改類申請</p>' +
         '<p class="pkt-modal__notice">若有問題，請於服務時間致電客服：<a href="tel:0809-089-001">0809-089-001</a></p>';
     }
     notice.classList.add('is-open');
@@ -1403,30 +1512,28 @@ button, input, select { font-family: inherit; }
   function isSubmitResultNotice() {
     return activeNotice === 'submit-success' ||
       activeNotice === 'submit-source' ||
-      activeNotice === 'submit-network';
+      activeNotice === 'submit-network' ||
+      activeNotice === 'submit-control';
   }
   function getSubmitScenario() {
-    var q = new URLSearchParams(window.location.search).get('submit');
-    if (q === 'network' || q === 'error') return 'network';
-    if (q === 'source') return 'source';
-    if (q === 'success') return 'success';
-    return null;
+    return SUBMIT_TYPE;
   }
   function isStockShortage() {
-    var scenario = getSubmitScenario();
-    if (scenario === 'source') return true;
-    if (scenario === 'success' || scenario === 'network') return false;
-    var q = new URLSearchParams(window.location.search).get('source');
-    if (q === '0' || q === 'false') return true;
-    if (q === '1' || q === 'true') return false;
-    return Math.random() < 0.5;
+    return getSubmitScenario() === 'source';
   }
   function isNetworkError() {
-    var scenario = getSubmitScenario();
-    if (scenario === 'network') return true;
-    if (scenario === 'success' || scenario === 'source') return false;
-    var q = new URLSearchParams(window.location.search).get('network');
-    return q === '1' || q === 'true' || q === 'fail' || q === 'error';
+    return getSubmitScenario() === 'network';
+  }
+  function isSystemControl() {
+    return getSubmitScenario() === 'control';
+  }
+  function syncDemoParamsToUrl() {
+    var next = new URLSearchParams(window.location.search);
+    next.set('notice', NOTICE_TYPE);
+    next.set('submit', SUBMIT_TYPE);
+    var qs = next.toString();
+    var url = window.location.pathname + (qs ? '?' + qs : '') + (window.location.hash || '');
+    window.history.replaceState(null, '', url);
   }
   function showQuotaNotice(balance, opts) {
     var amt = balance == null ? MARGIN_BALANCE : balance;
@@ -1443,32 +1550,37 @@ button, input, select { font-family: inherit; }
   }
   function openEntryNotice() {
     activeNotice = NOTICE_TYPE;
+    if (NOTICE_TYPE === 'none') return;
     if (NOTICE_TYPE === 'credit') {
-      setNoticeCancelVisible(true);
-      noticeTitle.textContent = '提示';
-      noticeBody.innerHTML =
-        '<p class="pkt-modal__notice">您尚未開立信用戶，請您前往開立信用戶</p>' +
-        '<p class="pkt-modal__notice pkt-modal__notice--alert">信用戶開戶需經元大證金審核，預計審核日為2個工作天</p>';
-      noticeOk.textContent = '前往信用戶開戶';
-    } else if (NOTICE_TYPE === 'quota') {
+      goCreditOpen();
+      return;
+    }
+    if (NOTICE_TYPE === 'quota') {
       showQuotaNotice(MARGIN_BALANCE);
       return;
-    } else {
-      setNoticeCancelVisible(false);
-      noticeTitle.textContent = '提示';
-      noticeBody.innerHTML =
-        '<p class="pkt-modal__notice">目前僅支援將「現股買進」變更為「融資買進」。</p>' +
-        '<p class="pkt-modal__notice">變更前請確認您已開通信用交易資格，且融資額度足夠。</p>' +
-        '<p class="pkt-modal__notice">是否確認辦理交易類別變更？</p>';
-      noticeOk.textContent = '確認';
     }
+    setNoticeCancelVisible(false);
+    noticeTitle.textContent = '提示';
+    noticeBody.innerHTML =
+      '<p class="pkt-modal__notice">目前僅支援將「現股買進」變更為「融資買進」。</p>' +
+      '<p class="pkt-modal__notice">變更前請確認您已開通信用交易資格，且融資額度足夠。</p>' +
+      '<p class="pkt-modal__notice">是否確認辦理交易類別變更？</p>';
+    noticeOk.textContent = '確認';
     notice.classList.add('is-open');
     notice.setAttribute('aria-hidden', 'false');
   }
 
   btnNext.addEventListener('click', openModal);
-  function goPortal() {
+  function goBack() {
+    if (window.history.length > 1) {
+      window.history.back();
+      return;
+    }
     window.location.href = PORTAL_URL;
+  }
+  function goCreditOpen() {
+    // 未開信用戶：進入本站即導向加開，不開雙鈕提示窗
+    window.location.replace(CREDIT_OPEN_URL);
   }
   document.getElementById('confirm-cancel').addEventListener('click', closeModal);
   document.getElementById('confirm-backdrop').addEventListener('click', function (e) {
@@ -1483,7 +1595,7 @@ button, input, select { font-family: inherit; }
     window.location.href = url;
   }
   document.getElementById('notice-ok').addEventListener('click', function () {
-    if (activeNotice === 'credit') { goExternal(CREDIT_OPEN_URL); return; }
+    if (activeNotice === 'credit') { goCreditOpen(); return; }
     if (activeNotice === 'quota' || activeNotice === 'quota-next') { goExternal(QUOTA_APPLY_URL); return; }
     closeNotice();
   });
@@ -1493,7 +1605,7 @@ button, input, select { font-family: inherit; }
       return;
     }
     if (isBlockingNotice()) {
-      goPortal();
+      goBack();
       return;
     }
     closeNotice();
@@ -1512,7 +1624,7 @@ button, input, select { font-family: inherit; }
       closeNotice();
       return;
     }
-    if (isBlockingNotice()) goPortal();
+    if (isBlockingNotice()) goBack();
     else closeNotice();
   });
   function todayText() {
@@ -1548,12 +1660,22 @@ button, input, select { font-family: inherit; }
     closeModal();
     if (isNetworkError()) {
       showSubmitResultNotice('network');
+      appendRecords(items, 'error');
       submitting = false;
       syncNext();
+      render();
+      return;
+    }
+    if (isSystemControl()) {
+      showSubmitResultNotice('control');
+      appendRecords(items, 'control');
+      submitting = false;
+      syncNext();
+      render();
       return;
     }
     if (isStockShortage()) {
-      showSubmitResultNotice('source');
+      showSubmitResultNotice('source', items);
       appendRecords(items, 'source');
       submitting = false;
       syncNext();
@@ -1566,6 +1688,60 @@ button, input, select { font-family: inherit; }
     render();
     showSubmitResultNotice('success');
   });
+
+  (function initDemoBar() {
+    var noticeSel = document.getElementById('demo-notice');
+    var submitSel = document.getElementById('demo-submit');
+    var applyBtn = document.getElementById('demo-apply');
+    var triggerBtn = document.getElementById('demo-trigger-notice');
+    if (!noticeSel || !submitSel || !applyBtn) return;
+    noticeSel.value = NOTICE_TYPE;
+    submitSel.value = SUBMIT_TYPE === 'network' ? 'network' : SUBMIT_TYPE;
+
+    function applyNoticeLive(value) {
+      NOTICE_TYPE = value;
+      pageLocked = false;
+      applyPageLock();
+      closeNotice();
+      closeModal();
+      entryNoticeOpened = true;
+      if (value === 'none') {
+        syncDemoParamsToUrl();
+        return;
+      }
+      if (value === 'credit') {
+        syncDemoParamsToUrl();
+        goCreditOpen();
+        return;
+      }
+      openEntryNotice();
+      syncDemoParamsToUrl();
+    }
+
+    noticeSel.addEventListener('change', function () {
+      applyNoticeLive(noticeSel.value);
+    });
+    submitSel.addEventListener('change', function () {
+      SUBMIT_TYPE = submitSel.value;
+      syncDemoParamsToUrl();
+    });
+    if (triggerBtn) {
+      triggerBtn.addEventListener('click', function () {
+        applyNoticeLive(noticeSel.value);
+      });
+    }
+    applyBtn.addEventListener('click', function () {
+      var next = new URLSearchParams(window.location.search);
+      next.set('notice', noticeSel.value);
+      next.set('submit', submitSel.value);
+      var hash = window.location.hash || '';
+      window.location.href = window.location.pathname + '?' + next.toString() + hash;
+    });
+    var bar = document.getElementById('demo-bar');
+    if (bar) {
+      document.documentElement.style.setProperty('--demo-bar-h', bar.offsetHeight + 'px');
+    }
+  })();
 
   render();
   showView(parseView());
