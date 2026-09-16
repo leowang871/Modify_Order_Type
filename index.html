@@ -600,6 +600,9 @@ body.has-demo-bar .pkt-header { top: var(--demo-bar-h, 50px); }
   width: min(560px, calc(100vw - 32px));
   border-radius: 10px;
 }
+.pkt-modal--notice.is-convert .pkt-modal__dialog {
+  width: min(520px, calc(100vw - 32px));
+}
 .pkt-modal--notice .pkt-modal__title {
   padding: 16px 40px;
   background: var(--pkt-member-bg);
@@ -1466,7 +1469,7 @@ body.has-demo-bar .pkt-header { top: var(--demo-bar-h, 50px); }
     modal.setAttribute('aria-hidden', 'true');
   }
   function closeNotice() {
-    notice.classList.remove('is-open');
+    notice.classList.remove('is-open', 'is-convert');
     notice.setAttribute('aria-hidden', 'true');
   }
   function isBlockingNotice() {
@@ -1481,6 +1484,7 @@ body.has-demo-bar .pkt-header { top: var(--demo-bar-h, 50px); }
   }
   function showSubmitResultNotice(type, shortageItems) {
     activeNotice = 'submit-' + type;
+    notice.classList.remove('is-convert');
     setNoticeCancelVisible(false);
     noticeTitle.textContent = '提示';
     noticeOk.textContent = '我知道了';
@@ -1539,6 +1543,7 @@ body.has-demo-bar .pkt-header { top: var(--demo-bar-h, 50px); }
     var amt = balance == null ? MARGIN_BALANCE : balance;
     var fromNext = opts && opts.fromNext;
     activeNotice = fromNext ? 'quota-next' : 'quota';
+    notice.classList.remove('is-convert');
     setNoticeCancelVisible(true);
     noticeTitle.textContent = '融資餘額不足';
     noticeBody.innerHTML =
@@ -1560,10 +1565,11 @@ body.has-demo-bar .pkt-header { top: var(--demo-bar-h, 50px); }
       return;
     }
     setNoticeCancelVisible(false);
+    notice.classList.add('is-convert');
     noticeTitle.textContent = '提示';
     noticeBody.innerHTML =
-      '<p class="pkt-modal__notice">目前僅支援將「現股買進」變更為「融資買進」。</p>' +
-      '<p class="pkt-modal__notice">變更前請確認您已開通信用交易資格，且融資額度足夠。</p>' +
+      '<p class="pkt-modal__notice pkt-modal__notice--alert">目前僅支援將「現股買進」變更為「融資買進」。</p>' +
+      '<p class="pkt-modal__notice">變更前請確認您已開通信用交易資格、融資額度足夠，<br>且該檔股票之融資配額張數足夠。</p>' +
       '<p class="pkt-modal__notice">是否確認辦理交易類別變更？</p>';
     noticeOk.textContent = '確認';
     notice.classList.add('is-open');
