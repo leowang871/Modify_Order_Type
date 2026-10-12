@@ -111,6 +111,7 @@ button, input, select { font-family: inherit; }
   border-color: var(--pkt-red-main);
   color: #fff;
 }
+.cr-tab[hidden] { display: none; }
 
 .cr-toolbar {
   display: flex;
@@ -370,29 +371,6 @@ body.has-demo-bar {
 }
 body.has-demo-bar .pkt-header { top: var(--demo-bar-h, 50px); }
 
-#view-empty .pkt-panel {
-  border-radius: var(--pkt-r-xl);
-  padding: 80px 40px;
-  min-height: 280px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.cr-empty-msg {
-  margin: 0;
-  max-width: 640px;
-  font-size: 16px;
-  font-weight: 400;
-  line-height: 1.75;
-  text-align: center;
-  color: var(--pkt-ink);
-}
-.cr-empty-msg a {
-  color: var(--pkt-ink);
-  font-weight: 700;
-  text-decoration: underline;
-  white-space: nowrap;
-}
 .cr-table tbody td {
   padding: 16px;
   border-bottom: 1px solid var(--pkt-gray-100);
@@ -735,7 +713,6 @@ body.has-demo-bar .pkt-header { top: var(--demo-bar-h, 50px); }
   .pkt-page-title { font-size: 18px; }
   .cr-btn-next { width: 100%; }
   .cr-records-query__fields { grid-template-columns: 1fr; }
-  #view-empty .pkt-panel { padding: 48px 20px; }
 }
   </style>
 </head>
@@ -747,6 +724,7 @@ body.has-demo-bar .pkt-header { top: var(--demo-bar-h, 50px); }
         <option value="convert">可辦理（確認）</option>
         <option value="credit">未開信用戶（直轉加開）</option>
         <option value="quota">融資餘額不足</option>
+        <option value="unavailable">無單／逾時</option>
         <option value="none">不跳出</option>
       </select>
     </label>
@@ -760,7 +738,7 @@ body.has-demo-bar .pkt-header { top: var(--demo-bar-h, 50px); }
     </label>
     <button type="button" id="demo-trigger-notice">立即跳出提示</button>
     <button type="button" id="demo-apply">寫入網址並重載</button>
-    <span class="demo-bar__hint">切換下拉即生效；不隨機。亦可 ?notice= / ?submit=</span>
+    <span class="demo-bar__hint">切換下拉即生效；不隨機。亦可 ?notice=unavailable / ?view=empty / ?submit=</span>
   </div>
   <header class="pkt-header">
     <button type="button" class="pkt-mobile-menu" aria-label="開啟選單">☰</button>
@@ -875,11 +853,6 @@ body.has-demo-bar .pkt-header { top: var(--demo-bar-h, 50px); }
       </div>
     </div>
 
-    <div class="cr-view" id="view-empty">
-      <div class="pkt-panel">
-        <p class="cr-empty-msg">您今日無下單紀錄或超過可改類時間，若有需求，請於服務時間聯絡客服：<a href="tel:0809-089-001">0809-089-001</a></p>
-      </div>
-    </div>
   </main>
 
   <div class="pkt-modal pkt-modal--notice" id="notice-modal" aria-hidden="true">
@@ -968,9 +941,12 @@ body.has-demo-bar .pkt-header { top: var(--demo-bar-h, 50px); }
     var n = q == null || q === '' ? 12800 : Number(q);
     return isNaN(n) ? 12800 : n;
   })();
-  var NOTICE_TYPES = ['credit', 'quota', 'convert', 'none'];
+  var NOTICE_TYPES = ['credit', 'quota', 'convert', 'unavailable', 'none'];
   var params = new URLSearchParams(window.location.search);
   var NOTICE_TYPE = (function () {
+    var viewQ = params.get('view');
+    var hash = (window.location.hash || '').replace('#', '');
+    if (viewQ === 'empty' || hash === 'empty') return 'unavailable';
     var q = params.get('notice');
     if (NOTICE_TYPES.indexOf(q) !== -1) return q;
     return 'convert';
@@ -1010,11 +986,12 @@ body.has-demo-bar .pkt-header { top: var(--demo-bar-h, 50px); }
   var recExport = document.getElementById('records-export');
   var viewApply = document.getElementById('view-apply');
   var viewRecords = document.getElementById('view-records');
-  var viewEmpty = document.getElementById('view-empty');
   var crTabs = document.getElementById('cr-tabs');
   var tabApply = document.getElementById('tab-apply');
   var tabRecords = document.getElementById('tab-records');
   var entryNoticeOpened = false;
+  var unavailableMode = NOTICE_TYPE === 'unavailable';
+  var unavailableNoticeShown = false;
   var tbody = document.getElementById('tbody');
   var tfoot = document.getElementById('tfoot');
   var thead = document.getElementById('thead');
@@ -1264,25 +1241,60 @@ body.has-demo-bar .pkt-header { top: var(--demo-bar-h, 50px); }
   }
   function parseView() {
     var h = (window.location.hash || '').replace('#', '');
-    if (h === 'apply' || h === 'records' || h === 'empty') return h;
+    if (h === 'empty' || unavailableMode) {
+      if (h === 'apply') return 'records';
+      if (h === 'records') return 'records';
+      return 'records';
+    }
+    if (h === 'apply' || h === 'records') return h;
     var q = new URLSearchParams(window.location.search).get('view');
-    if (q === 'empty' || q === 'records' || q === 'apply') return q;
+    if (q === 'empty') return 'records';
+    if (q === 'records' || q === 'apply') return q;
     return 'apply';
   }
+  function setUnavailableMode(on) {
+    unavailableMode = !!on;
+    tabApply.hidden = unavailableMode;
+    crTabs.hidden = false;
+  }
+  function showUnavailableNotice() {
+    activeNotice = 'unavailable';
+    notice.classList.remove('is-convert');
+    setNoticeCancelVisible(false);
+    noticeTitle.textContent = '提示';
+    noticeOk.textContent = '我知道了';
+    noticeBody.innerHTML =
+      '<p class="pkt-modal__notice">您今日無下單紀錄或超過可改類時間</p>' +
+      '<p class="pkt-modal__notice">若有問題，請於上班時間致電客服 <a href="tel:0809-089-001">0809-089-001</a></p>';
+    notice.classList.add('is-open');
+    notice.setAttribute('aria-hidden', 'false');
+  }
+  function isUnavailableNotice() {
+    return activeNotice === 'unavailable';
+  }
   function showView(name) {
+    if (unavailableMode && name === 'apply') name = 'records';
+    if (name === 'empty') name = 'records';
+
     viewApply.classList.toggle('is-on', name === 'apply');
     viewRecords.classList.toggle('is-on', name === 'records');
-    viewEmpty.classList.toggle('is-on', name === 'empty');
-    crTabs.hidden = name === 'empty';
+    tabApply.hidden = unavailableMode;
+    crTabs.hidden = false;
     tabApply.classList.toggle('is-active', name === 'apply');
     tabRecords.classList.toggle('is-active', name === 'records');
     tabApply.setAttribute('aria-current', name === 'apply' ? 'page' : '');
     tabRecords.setAttribute('aria-current', name === 'records' ? 'page' : '');
     if (name !== 'apply') {
       closeModal();
-      if (notice.classList.contains('is-open') && !isBlockingNotice()) closeNotice();
+      if (notice.classList.contains('is-open') && !isBlockingNotice() && !isUnavailableNotice()) closeNotice();
     }
     if (name === 'records') renderRecords();
+    if (unavailableMode && !unavailableNoticeShown) {
+      unavailableNoticeShown = true;
+      entryNoticeOpened = true;
+      showUnavailableNotice();
+      return;
+    }
     if (name === 'apply' && !entryNoticeOpened) {
       entryNoticeOpened = true;
       openEntryNotice();
@@ -1431,6 +1443,11 @@ body.has-demo-bar .pkt-header { top: var(--demo-bar-h, 50px); }
   });
   recExport.addEventListener('click', exportRecordsCsv);
   window.addEventListener('hashchange', function () {
+    var h = (window.location.hash || '').replace('#', '');
+    if (unavailableMode && (h === 'apply' || h === 'empty')) {
+      window.location.hash = 'records';
+      return;
+    }
     showView(parseView());
   });
   document.getElementById('query-form').addEventListener('submit', function (e) {
@@ -1556,6 +1573,16 @@ body.has-demo-bar .pkt-header { top: var(--demo-bar-h, 50px); }
   function openEntryNotice() {
     activeNotice = NOTICE_TYPE;
     if (NOTICE_TYPE === 'none') return;
+    if (NOTICE_TYPE === 'unavailable') {
+      setUnavailableMode(true);
+      unavailableNoticeShown = false;
+      if ((window.location.hash || '') !== '#records') {
+        window.location.hash = 'records';
+        return;
+      }
+      showView('records');
+      return;
+    }
     if (NOTICE_TYPE === 'credit') {
       goCreditOpen();
       return;
@@ -1569,7 +1596,8 @@ body.has-demo-bar .pkt-header { top: var(--demo-bar-h, 50px); }
     noticeTitle.textContent = '提示';
     noticeBody.innerHTML =
       '<p class="pkt-modal__notice pkt-modal__notice--alert">目前僅支援將「現股買進」變更為「融資買進」。</p>' +
-      '<p class="pkt-modal__notice">變更前請確認您已開通信用交易資格、融資額度足夠，<br>且該檔股票之融資配額張數足夠。</p>' +
+      '<p class="pkt-modal__notice">變更前請確認您已開通信用交易資格，且融資額度足夠。</p>' +
+      '<p class="pkt-modal__notice">變更後系統將檢核該檔股票的融資配額，若配額不足，請洽客服中心 <a href="tel:0809-089-001">0809-089-001</a> 詢問。</p>' +
       '<p class="pkt-modal__notice">是否確認辦理交易類別變更？</p>';
     noticeOk.textContent = '確認';
     notice.classList.add('is-open');
@@ -1603,6 +1631,16 @@ body.has-demo-bar .pkt-header { top: var(--demo-bar-h, 50px); }
   document.getElementById('notice-ok').addEventListener('click', function () {
     if (activeNotice === 'credit') { goCreditOpen(); return; }
     if (activeNotice === 'quota' || activeNotice === 'quota-next') { goExternal(QUOTA_APPLY_URL); return; }
+    if (isUnavailableNotice()) {
+      closeNotice();
+      setUnavailableMode(true);
+      if ((window.location.hash || '') !== '#records') {
+        window.location.hash = 'records';
+      } else {
+        showView('records');
+      }
+      return;
+    }
     closeNotice();
   });
   document.getElementById('notice-cancel').addEventListener('click', function () {
@@ -1626,7 +1664,14 @@ body.has-demo-bar .pkt-header { top: var(--demo-bar-h, 50px); }
       return;
     }
     if (!notice.classList.contains('is-open')) return;
-    if (isQuotaNextNotice() || isSubmitResultNotice()) {
+    if (isQuotaNextNotice() || isSubmitResultNotice() || isUnavailableNotice()) {
+      if (isUnavailableNotice()) {
+        closeNotice();
+        setUnavailableMode(true);
+        if ((window.location.hash || '') !== '#records') window.location.hash = 'records';
+        else showView('records');
+        return;
+      }
       closeNotice();
       return;
     }
@@ -1711,6 +1756,18 @@ body.has-demo-bar .pkt-header { top: var(--demo-bar-h, 50px); }
       closeNotice();
       closeModal();
       entryNoticeOpened = true;
+      unavailableNoticeShown = false;
+      if (value === 'unavailable') {
+        setUnavailableMode(true);
+        syncDemoParamsToUrl();
+        if ((window.location.hash || '') !== '#records') {
+          window.location.hash = 'records';
+        } else {
+          showView('records');
+        }
+        return;
+      }
+      setUnavailableMode(false);
       if (value === 'none') {
         syncDemoParamsToUrl();
         return;
@@ -1719,6 +1776,9 @@ body.has-demo-bar .pkt-header { top: var(--demo-bar-h, 50px); }
         syncDemoParamsToUrl();
         goCreditOpen();
         return;
+      }
+      if ((window.location.hash || '') !== '#apply') {
+        window.location.hash = 'apply';
       }
       openEntryNotice();
       syncDemoParamsToUrl();
@@ -1750,7 +1810,11 @@ body.has-demo-bar .pkt-header { top: var(--demo-bar-h, 50px); }
   })();
 
   render();
-  showView(parseView());
+  if (unavailableMode && (window.location.hash || '') !== '#records') {
+    window.location.hash = 'records';
+  } else {
+    showView(parseView());
+  }
 })();
   </script>
 </body>
