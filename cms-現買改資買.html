@@ -488,6 +488,7 @@ html, body {
 
 .mc-status--approved { background: #E4F3EB; color: rgb(31, 138, 91); }
 .mc-status--source { background: #FFEAEA; color: var(--brand-crimson); }
+.mc-status--stop { background: #FFEAEA; color: var(--brand-crimson); }
 .mc-status--error { background: #F3E8FF; color: #6B21A8; }
 .mc-status--control { background: #FFF4E5; color: #B45309; }
 
@@ -800,7 +801,7 @@ html, body {
    fromType / toType： 現買 = cash、融資 = margin、融券 = short
    lots：成交張數；toLots：更正後張數（可小於成交張數，表示只改部分張）
    idNo：身分證字號（畫面欄位標為 ID）
-   status： approved 已通過、source 配額不足、error 系統錯誤、control 系統管制
+   status： approved 已通過、source 配額不足、stop 停資、error 系統錯誤、control 系統管制
    單頁查詢；成交日期起迄預設為當日（BUSINESS_DATE），可擴大查詢歷史。
    ※ 列唯一鍵為 id（如 R001），與身分證 idNo 不同。 */
 function todayIso() {
@@ -815,6 +816,7 @@ const MOCK_ROWS = [
   { id: 'R002', tradeDate: BUSINESS_DATE, applyDate: BUSINESS_DATE, orderNo: 'A0000118', idNo: 'B234567890', account: '6620981', accountName: '李美玲', stockCode: '2317', stockName: '鴻海',     side: 'B', lots: 12, toLots: 12, price: 214.5,  fromType: 'cash', toType: 'margin', offsetDate: BUSINESS_DATE, status: 'approved', reason: '' },
   { id: 'R003', tradeDate: BUSINESS_DATE, applyDate: BUSINESS_DATE, orderNo: 'A0000121', idNo: 'C345678901', account: '6620982', accountName: '陳志豪', stockCode: '2454', stockName: '聯發科',   side: 'B', lots: 2,  toLots: 2,  price: 1420.0, fromType: 'cash', toType: 'margin', offsetDate: BUSINESS_DATE, status: 'approved', reason: '' },
   { id: 'R004', tradeDate: BUSINESS_DATE, applyDate: BUSINESS_DATE, orderNo: 'A0000125', idNo: 'D456789012', account: '6620983', accountName: '林雅婷', stockCode: '2882', stockName: '國泰金',   side: 'B', lots: 20, toLots: 10, price: 68.9,   fromType: 'cash', toType: 'margin', offsetDate: BUSINESS_DATE, status: 'source',   reason: '配額不足' },
+  { id: 'R004S', tradeDate: BUSINESS_DATE, applyDate: BUSINESS_DATE, orderNo: 'A0000126', idNo: 'D456789013', account: '6620983', accountName: '林雅婷', stockCode: '2303', stockName: '聯電',     side: 'B', lots: 5,  toLots: 5,  price: 58.7,   fromType: 'cash', toType: 'margin', offsetDate: BUSINESS_DATE, status: 'stop',     reason: '停資' },
   { id: 'R005', tradeDate: BUSINESS_DATE, applyDate: BUSINESS_DATE, orderNo: 'A0000128', idNo: 'E567890123', account: '6620984', accountName: '張建國', stockCode: '2603', stockName: '長榮',     side: 'B', lots: 8,  toLots: 8,  price: 196.0,  fromType: 'cash', toType: 'margin', offsetDate: BUSINESS_DATE, status: 'error',    reason: '系統錯誤' },
   { id: 'R006', tradeDate: '2026-08-25', applyDate: '2026-08-25', orderNo: 'A0000103', idNo: 'F678901234', account: '6620985', accountName: '黃淑芬', stockCode: '2609', stockName: '陽明',     side: 'B', lots: 15, toLots: 8,  price: 84.3,   fromType: 'cash', toType: 'margin', offsetDate: '2026-08-25', status: 'approved', reason: '' },
   { id: 'R007', tradeDate: '2026-08-24', applyDate: '2026-08-24', orderNo: 'A0000081', idNo: 'G789012345', account: '6620986', accountName: '吳俊傑', stockCode: '2412', stockName: '中華電',   side: 'B', lots: 6,  toLots: 6,  price: 132.5,  fromType: 'cash', toType: 'margin', offsetDate: '2026-08-24', status: 'approved', reason: '' },
@@ -840,6 +842,7 @@ const SIDE_SHORT = { B: '買進', S: '賣出' };
 const STATUS_MAP = {
   approved: { label: '已通過', className: 'mc-status--approved' },
   source:   { label: '配額不足', className: 'mc-status--source' },
+  stop:     { label: '停資', className: 'mc-status--stop' },
   error:    { label: '系統錯誤', className: 'mc-status--error' },
   control:  { label: '系統管制', className: 'mc-status--control' },
 };
@@ -1150,6 +1153,7 @@ function MarginChangePage() {
               <option value="">全部</option>
               <option value="approved">已通過</option>
               <option value="source">配額不足</option>
+              <option value="stop">停資</option>
               <option value="error">系統錯誤</option>
               <option value="control">系統管制</option>
             </select>

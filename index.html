@@ -1516,7 +1516,6 @@ body.has-demo-bar .pkt-header { top: var(--demo-bar-h, 50px); }
       var stockText = unique.length ? unique.join('、') : '（標的未指定）';
       noticeBody.innerHTML =
         '<p class="pkt-modal__notice pkt-modal__notice--alert">配額不足標的：' + stockText + '</p>' +
-        '<p class="pkt-modal__notice">請於T+2日確認交割帳戶有足額交割款</p>' +
         '<p class="pkt-modal__notice">若有問題，請於服務時間致電客服：<a href="tel:0809-089-001">0809-089-001</a></p>';
     } else if (type === 'network') {
       noticeBody.innerHTML =

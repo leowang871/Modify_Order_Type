@@ -1,0 +1,1686 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>口袋證券 · 下單改類申請</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+:root {
+  --pkt-red-main: #E95465;
+  --pkt-red-hover: #D03B4C;
+  --pkt-red-deep: #E60039;
+  --pkt-member-bg: #FEEDED;
+  --pkt-pink-50: #FFF2F2;
+  --pkt-ink: #252525;
+  --pkt-gray-700: #3E3A39;
+  --pkt-gray-500: #717071;
+  --pkt-gray-300: #C8C9CA;
+  --pkt-gray-100: #EEEEEF;
+  --pkt-gray-50: #F5F5F5;
+  --pkt-white: #FFFFFF;
+  --pkt-shadow-card: 0 1px 5px 0 rgba(0, 0, 0, 0.05);
+  --pkt-shadow-lift: 3px 5px 10px 0 rgba(0, 0, 0, 0.10);
+  --pkt-shadow-header: 0 1px 1px 0 rgba(0, 0, 0, 0.25);
+  --pkt-r-md: 8px;
+  --pkt-r-lg: 10px;
+  --pkt-r-xl: 16px;
+  --pkt-r-pill: 100px;
+  --pkt-font-sans: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+  --pkt-font-latin: "Inter", "Noto Sans TC", sans-serif;
+  --content-max: 1200px;
+  --header-h: 72px;
+  --page-pad-x: clamp(16px, 3.2vw, 40px);
+  --page-pad-y: clamp(20px, 3vw, 28px);
+  --panel-pad: clamp(16px, 2.2vw, 28px);
+  --touch: 44px;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: var(--pkt-font-sans);
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--pkt-ink);
+  background:
+    radial-gradient(120% 80% at 100% -10%, rgba(233, 84, 101, 0.08), transparent 55%),
+    linear-gradient(180deg, #FFF8F8 0%, var(--pkt-gray-50) 32%, var(--pkt-gray-50) 100%);
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+a { color: inherit; text-decoration: none; }
+button, input, select { font-family: inherit; }
+
+.pkt-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  height: var(--header-h);
+  background: var(--pkt-white);
+  box-shadow: var(--pkt-shadow-header);
+  display: flex;
+  align-items: center;
+  padding: 0 40px;
+}
+.pkt-brand { display: inline-flex; align-items: center; gap: 10px; }
+.pkt-shield { width: 40px; height: 40px; color: var(--pkt-red-deep); }
+.pkt-brand-text { font-weight: 700; font-size: 22px; letter-spacing: 0.04em; }
+
+.pkt-main {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: var(--page-pad-y) var(--page-pad-x) clamp(48px, 8vw, 80px);
+}
+
+.pkt-page-title {
+  margin: 0 0 16px;
+  font-size: clamp(18px, 2.4vw, 22px);
+  font-weight: 700;
+  color: var(--pkt-ink);
+  letter-spacing: 0.01em;
+}
+
+.pkt-panel {
+  background: var(--pkt-white);
+  border-radius: 0 0 var(--pkt-r-xl) var(--pkt-r-xl);
+  box-shadow: var(--pkt-shadow-card);
+  padding: var(--panel-pad);
+  animation: pkt-rise 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes pkt-rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pkt-panel { animation: none; }
+}
+
+/* 分頁在灰底上，白卡從搜尋列開始 */
+.cr-tabs {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  border-bottom: none;
+}
+.cr-tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 108px;
+  height: 40px;
+  padding: 0 22px;
+  margin-bottom: -1px;
+  border: 1px solid var(--pkt-gray-100);
+  border-bottom: none;
+  border-radius: 10px 10px 0 0;
+  background: #FAFAFA;
+  color: var(--pkt-gray-500);
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.cr-tab.is-active {
+  background: var(--pkt-red-main);
+  border-color: var(--pkt-red-main);
+  color: #fff;
+}
+
+.cr-toolbar {
+  display: grid;
+  grid-template-columns: auto minmax(180px, 280px) minmax(160px, 220px) auto;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 18px;
+}
+.cr-field-label {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--pkt-ink);
+  white-space: nowrap;
+}
+.cr-account {
+  width: 100%;
+  min-width: 0;
+  height: var(--touch);
+  padding: 0 14px;
+  border: 1px solid #000;
+  border-radius: 6px;
+  font-size: 16px;
+  color: var(--pkt-ink);
+  background: #FAFAFA;
+  cursor: default;
+}
+.cr-search {
+  position: relative;
+  min-width: 0;
+  width: 100%;
+}
+.cr-search input {
+  width: 100%;
+  height: var(--touch);
+  padding: 0 14px 0 38px;
+  border: 1px solid var(--pkt-gray-300);
+  border-radius: 6px;
+  font-size: 15px;
+  background: #fff;
+}
+.cr-search input:focus {
+  outline: none;
+  border-color: var(--pkt-red-main);
+}
+.cr-search svg {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  color: var(--pkt-gray-500);
+  pointer-events: none;
+}
+.cr-btn-search {
+  height: var(--touch);
+  min-width: 88px;
+  padding: 0 20px;
+  border: none;
+  border-radius: 8px;
+  background: var(--pkt-red-main);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 160ms ease, transform 160ms ease;
+}
+.cr-btn-search:hover { background: var(--pkt-red-hover); }
+.cr-btn-search:active { transform: scale(0.98); }
+
+.cr-table-shell {
+  position: relative;
+}
+.cr-table-shell::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 28px;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.95));
+  opacity: 0;
+  transition: opacity 200ms ease;
+}
+.cr-table-shell.is-scrollable::after { opacity: 1; }
+.cr-table-wrap {
+  width: 100%;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  border-radius: 8px;
+}
+
+.cr-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 16px;
+}
+.cr-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  padding: 12px 16px;
+  background: var(--pkt-member-bg);
+  font-weight: 600;
+  text-align: left;
+  white-space: nowrap;
+}
+.cr-table thead th:first-child {
+  left: 0;
+  z-index: 5;
+  border-radius: 8px 0 0 8px;
+  box-shadow: 6px 0 10px -8px rgba(0, 0, 0, 0.18);
+}
+.cr-table thead th:last-child { border-radius: 0 8px 8px 0; }
+.cr-sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  background: transparent;
+  padding: 0;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  color: inherit;
+}
+.cr-sort__arrows {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0;
+  line-height: 1;
+  font-size: 9px;
+  color: #C0C0C0;
+}
+.cr-sort__arrows .is-on { color: var(--pkt-red-main); }
+
+.cr-table thead th:nth-child(3),
+.cr-table thead th:nth-child(5),
+.cr-table tbody td:nth-child(3),
+.cr-table tbody td:nth-child(5) {
+  text-align: center;
+}
+.cr-table thead th:nth-child(3) .cr-sort {
+  justify-content: center;
+  width: 100%;
+}
+.cr-table tbody td {
+  padding: 16px;
+  border-bottom: 1px solid var(--pkt-gray-100);
+  font-variant-numeric: tabular-nums;
+  font-family: var(--pkt-font-latin), var(--pkt-font-sans);
+}
+.cr-table tbody td:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  box-shadow: 6px 0 10px -8px rgba(0, 0, 0, 0.16);
+}
+.cr-table tbody tr.cr-row.row-gray td { background: var(--pkt-gray-50); }
+.cr-table tbody tr.cr-row.row-pink td { background: var(--pkt-member-bg); }
+.cr-table tbody tr.cr-row.is-selected td { background: var(--pkt-pink-50); }
+.cr-table tbody tr.cr-row.row-gray td:first-child { background: var(--pkt-gray-50); }
+.cr-table tbody tr.cr-row.row-pink td:first-child { background: var(--pkt-member-bg); }
+.cr-table tbody tr.cr-row.is-selected td:first-child { background: var(--pkt-pink-50); }
+
+.cr-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--pkt-font-sans);
+  min-width: 9.5rem;
+}
+.cr-label-short { display: none; }
+.cr-mobile-field-label { display: none; }
+.cr-unit { font-family: var(--pkt-font-sans); font-weight: 500; }
+.cr-row-select {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+}
+.cr-row-select input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--pkt-red-main);
+  cursor: pointer;
+}
+.cr-th-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.cr-table tbody tr.cr-row:not(.is-selected) .cr-col-convert,
+.cr-table tbody tr.cr-row:not(.is-selected) .cr-col-est {
+  opacity: 0.4;
+}
+.cr-est {
+  white-space: nowrap;
+}
+.cr-num-red { color: var(--pkt-red-main); font-weight: 700; }
+.cr-num-warn { color: var(--pkt-red-deep); font-weight: 700; }
+.cr-table tfoot tr.is-over td { background: #FFE8E8; }
+.pkt-panel.is-locked .cr-table-wrap,
+.pkt-panel.is-locked .cr-toolbar,
+.pkt-panel.is-locked .cr-footer {
+  pointer-events: none;
+  opacity: 0.45;
+}
+.cr-btn-search:disabled { opacity: 0.45; cursor: not-allowed; }
+.cr-table tfoot td {
+  padding: 14px 16px;
+  background: var(--pkt-pink-50);
+  border-top: 1px solid var(--pkt-gray-100);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  font-family: var(--pkt-font-sans);
+  text-align: right;
+}
+
+.cr-stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 148px;
+}
+.cr-stepper__btn {
+  width: auto;
+  min-width: 28px;
+  height: 36px;
+  padding: 0 2px;
+  border: none;
+  background: transparent;
+  font-size: 22px;
+  line-height: 1;
+  font-weight: 400;
+  color: #6B6B6B;
+  cursor: pointer;
+}
+.cr-stepper__btn:hover:not(:disabled) { color: var(--pkt-red-main); }
+.cr-stepper__btn:disabled { opacity: 0.35; cursor: not-allowed; }
+.cr-stepper__field {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 92px;
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--pkt-gray-300);
+  border-radius: 12px;
+  background: #fff;
+}
+.cr-stepper__field:focus-within {
+  border-color: var(--pkt-red-main);
+}
+.cr-stepper__input {
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  outline: none;
+  font-family: var(--pkt-font-latin), var(--pkt-font-sans);
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--pkt-ink);
+  text-align: left;
+}
+.cr-stepper__unit {
+  flex: 0 0 auto;
+  margin-left: 6px;
+  color: var(--pkt-ink);
+  font-family: var(--pkt-font-sans);
+  font-size: 16px;
+}
+
+.cr-empty {
+  padding: 48px 16px;
+  text-align: center;
+  color: var(--pkt-gray-500);
+}
+
+.cr-footer {
+  display: flex;
+  justify-content: center;
+  margin-top: 28px;
+}
+.cr-btn-next {
+  min-width: 240px;
+  height: 44px;
+  border: none;
+  border-radius: var(--pkt-r-pill);
+  background: var(--pkt-red-main);
+  color: #fff;
+  font-size: 17px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.cr-btn-next:hover { background: var(--pkt-red-hover); }
+.cr-btn-next:disabled {
+  background: var(--pkt-gray-300);
+  cursor: not-allowed;
+}
+
+.pkt-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.pkt-modal.is-open { display: flex; }
+.pkt-modal__backdrop {
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,.45); border: 0; cursor: default;
+}
+.pkt-modal__dialog {
+  position: relative;
+  width: min(720px, calc(100vw - 32px));
+  background: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0,0,0,.18);
+}
+.pkt-modal__title {
+  margin: 0;
+  padding: 14px 18px;
+  background: #f8cdd1;
+  font-size: 18px;
+  font-weight: 700;
+}
+.pkt-modal__body { padding: 16px 18px 12px; }
+.pkt-modal--notice.is-open {
+  align-items: flex-start;
+  padding-top: 328px;
+}
+.pkt-modal--notice .pkt-modal__backdrop {
+  background: transparent;
+  cursor: default;
+}
+.pkt-modal--notice .pkt-modal__dialog {
+  position: relative;
+  width: min(560px, calc(100vw - 32px));
+  border-radius: 10px;
+}
+.pkt-modal__close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--pkt-gray-500);
+  font-size: 28px;
+  font-weight: 400;
+  line-height: 1;
+  cursor: pointer;
+}
+.pkt-modal__close:hover { color: var(--pkt-ink); background: rgba(0, 0, 0, 0.04); }
+.pkt-modal--notice.is-convert .pkt-modal__dialog {
+  width: min(520px, calc(100vw - 32px));
+}
+.pkt-modal--notice .pkt-modal__title {
+  padding: 16px 40px;
+  background: var(--pkt-member-bg);
+  border-bottom: 1px solid rgba(233, 84, 101, 0.18);
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.5;
+  text-align: center;
+}
+.pkt-modal--notice .pkt-modal__body {
+  padding: 24px 40px;
+  text-align: center;
+}
+.pkt-modal--notice .pkt-modal__notice {
+  margin: 0 0 16px;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.75;
+  text-align: center;
+  color: var(--pkt-ink);
+}
+.pkt-modal--notice .pkt-modal__notice:last-child { margin-bottom: 0; }
+.pkt-modal--notice .pkt-modal__notice--alert {
+  color: var(--pkt-red-main);
+}
+.pkt-modal--notice .pkt-modal__actions {
+  gap: 12px;
+  padding: 0 40px 24px;
+}
+.pkt-modal--notice .pkt-modal__btn {
+  height: 44px;
+  border-radius: 8px;
+  font-size: 16px;
+}
+.pkt-modal--notice .pkt-modal__btn--cancel:hover { background: var(--pkt-pink-50); }
+.pkt-modal--notice .pkt-modal__btn--submit:hover { background: var(--pkt-red-hover); }
+.pkt-modal--notice.is-single .pkt-modal__btn--cancel { display: none; }
+.pkt-modal--notice.is-single .pkt-modal__actions {
+  justify-content: center;
+}
+.pkt-modal--notice.is-single .pkt-modal__btn--submit {
+  flex: 0 0 auto;
+  min-width: 120px;
+  width: 120px;
+  height: 40px;
+  font-size: 15px;
+}
+.pkt-modal__warning {
+  margin: 14px 0 0;
+  color: var(--pkt-red-main);
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+}
+.pkt-modal__actions {
+  display: flex; gap: 12px; padding: 8px 18px 18px;
+}
+.pkt-modal__btn {
+  flex: 1; height: 42px; border-radius: 8px; font-size: 16px; font-weight: 500; cursor: pointer;
+}
+.pkt-modal__btn--cancel {
+  border: 1px solid var(--pkt-red-main); background: #fff; color: var(--pkt-red-main);
+}
+.pkt-modal__btn--submit {
+  border: 0; background: var(--pkt-red-main); color: #fff;
+}
+
+.cr-summary {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.cr-summary th {
+  background: var(--pkt-member-bg);
+  padding: 10px;
+  text-align: center;
+}
+.cr-summary td { padding: 10px; text-align: center; border-bottom: 1px solid var(--pkt-gray-100); }
+.cr-summary tfoot td {
+  padding: 12px 10px;
+  text-align: right;
+  font-weight: 600;
+  border-bottom: none;
+  background: var(--pkt-pink-50);
+}
+
+.pkt-toast {
+  display: none;
+  position: fixed;
+  top: 88px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 210;
+  padding: 12px 24px;
+  background: var(--pkt-ink);
+  color: #fff;
+  border-radius: 8px;
+}
+.pkt-toast.is-visible { display: block; }
+
+.pkt-mobile-menu, .pkt-mobile-logout { display: none; }
+
+/* Tablet */
+@media (max-width: 900px) {
+  .pkt-header { padding: 0 var(--page-pad-x); }
+  .cr-toolbar {
+    grid-template-columns: auto 1fr;
+    grid-template-areas:
+      "label account"
+      "search search"
+      "btn btn";
+  }
+  .cr-field-label { grid-area: label; }
+  .cr-account { grid-area: account; }
+  .cr-search { grid-area: search; }
+  .cr-btn-search { grid-area: btn; width: 100%; }
+  .pkt-modal { padding: 16px; }
+  .pkt-modal__dialog { width: min(720px, calc(100vw - 24px)); max-height: min(86vh, 860px); overflow: auto; }
+  .pkt-modal--notice.is-open { padding-top: 96px; align-items: flex-start; }
+  .pkt-modal--notice .pkt-modal__dialog { width: min(560px, calc(100vw - 24px)); }
+  .pkt-modal--notice .pkt-modal__title,
+  .pkt-modal--notice .pkt-modal__body,
+  .pkt-modal--notice .pkt-modal__actions { padding-left: 20px; padding-right: 20px; }
+}
+
+/* Phone */
+@media (max-width: 560px) {
+  :root { --header-h: 56px; --touch: 44px; }
+  .pkt-header { height: var(--header-h); justify-content: center; }
+  .pkt-brand-text { font-size: 18px; }
+  .pkt-shield { width: 27px; height: 27px; }
+  .pkt-mobile-menu, .pkt-mobile-logout {
+    display: inline-flex; position: absolute; top: 50%; transform: translateY(-50%);
+    height: 34px; align-items: center; justify-content: center; background: #fff;
+  }
+  .pkt-mobile-menu { left: 12px; width: 34px; border: 0; font-size: 20px; }
+  .pkt-mobile-logout {
+    right: 12px; min-width: 56px; padding: 0 12px;
+    border: 1px solid var(--pkt-red-main); border-radius: 7px; color: var(--pkt-red-main);
+  }
+  .cr-tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+  }
+  .cr-tab {
+    min-width: 0;
+    width: 100%;
+    height: 40px;
+    padding: 0 8px;
+    font-size: 14px;
+    border-radius: 10px 10px 0 0;
+  }
+  .cr-toolbar {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "label"
+      "account"
+      "search"
+      "btn";
+    gap: 10px;
+  }
+  .cr-field-label { font-size: 14px; }
+  .cr-btn-search { min-height: var(--touch); }
+  .cr-btn-next {
+    width: 100%;
+    min-width: 0;
+    min-height: var(--touch);
+    border-radius: 12px;
+  }
+  .cr-footer {
+    position: sticky;
+    bottom: 0;
+    z-index: 6;
+    margin: 16px -4px 0;
+    padding: 12px 4px calc(12px + env(safe-area-inset-bottom, 0px));
+    background: linear-gradient(180deg, rgba(255,255,255,0), #fff 28%);
+  }
+
+  /* 對齊借券專區 lend-table：粉紅表頭＋卡片列，勾選後展開 */
+  .cr-table-shell::after { display: none; }
+  .cr-table-wrap { overflow: visible; }
+  .cr-table,
+  .cr-table thead,
+  .cr-table tbody,
+  .cr-table tfoot { display: block; width: 100%; min-width: 0; }
+  .cr-table thead tr,
+  .cr-table tbody tr.cr-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    width: 100%;
+  }
+  .cr-table thead tr {
+    margin-bottom: 10px;
+    border-radius: 12px;
+    overflow: hidden;
+    background: linear-gradient(90deg, #f8cdd1 0%, #fde7ec 100%);
+  }
+  .cr-table thead th {
+    display: block;
+    padding: 11px 12px;
+    background: transparent;
+    font-size: 13px;
+    font-weight: 700;
+    text-align: left;
+    border-radius: 0 !important;
+  }
+  .cr-table thead th.cr-col-name { display: flex; align-items: center; gap: 9px; }
+  .cr-table thead th.cr-col-lots { text-align: right; }
+  .cr-table thead th.cr-col-price,
+  .cr-table thead th.cr-col-convert,
+  .cr-table thead th.cr-col-est { display: none; }
+  .cr-table thead .cr-sort { color: inherit; }
+  .cr-table thead .cr-sort__arrows { display: none; }
+  .cr-table tbody {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .cr-table tbody tr.cr-row {
+    margin: 0;
+    padding: 0;
+    border: 1px solid var(--pkt-gray-100);
+    border-radius: 14px;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 2px 10px rgba(37, 37, 37, 0.04);
+  }
+  .cr-table tbody tr.cr-row td,
+  .cr-table tbody tr.cr-row td:first-child {
+    box-shadow: none;
+    position: static;
+  }
+  .cr-table tbody tr.cr-row.is-selected {
+    border-color: rgba(233, 84, 101, 0.28);
+    box-shadow: 0 4px 14px rgba(233, 84, 101, 0.10);
+  }
+  .cr-table tbody tr.cr-row td {
+    display: flex;
+    min-height: 44px;
+    padding: 10px 12px;
+    align-items: center;
+    border-bottom: none;
+    font-size: 14px;
+  }
+  /* 小 head：勾選＋標的＋可改；灰／粉穿插 */
+  .cr-table tbody tr.cr-row.row-gray .cr-col-name,
+  .cr-table tbody tr.cr-row.row-gray .cr-col-lots {
+    background: var(--pkt-gray-50) !important;
+  }
+  .cr-table tbody tr.cr-row.row-pink .cr-col-name,
+  .cr-table tbody tr.cr-row.row-pink .cr-col-lots {
+    background: var(--pkt-member-bg) !important;
+  }
+  .cr-table tbody tr.cr-row.is-selected .cr-col-name,
+  .cr-table tbody tr.cr-row.is-selected .cr-col-lots {
+    background: #f8cdd1 !important;
+  }
+  .cr-col-name {
+    grid-column: 1;
+    grid-row: 1;
+    gap: 10px;
+    font-weight: 600;
+    min-width: 0;
+    word-break: break-word;
+  }
+  .cr-col-lots {
+    grid-column: 2;
+    grid-row: 1;
+    justify-content: flex-end;
+    white-space: nowrap;
+    font-weight: 600;
+    color: var(--pkt-gray-700);
+  }
+  /* 勾選後才展開：單價／改資買／預估 */
+  .cr-table tbody tr.cr-row .cr-col-price,
+  .cr-table tbody tr.cr-row .cr-col-convert,
+  .cr-table tbody tr.cr-row .cr-col-est {
+    display: none;
+    grid-column: 1 / -1;
+    grid-template-columns: 7em minmax(0, 1fr);
+    align-items: center;
+    column-gap: 12px;
+    min-height: 48px;
+    margin: 0;
+    padding: 10px 12px;
+    border-radius: 0 !important;
+    background: #fff !important;
+    border: none;
+    border-top: 1px solid var(--pkt-gray-100);
+    opacity: 1 !important;
+  }
+  .cr-table tbody tr.cr-row .cr-col-price { grid-row: 2; }
+  .cr-table tbody tr.cr-row .cr-col-convert { grid-row: 3; }
+  .cr-table tbody tr.cr-row .cr-col-est { grid-row: 4; }
+  .cr-table tbody tr.cr-row.is-selected .cr-col-price,
+  .cr-table tbody tr.cr-row.is-selected .cr-col-convert,
+  .cr-table tbody tr.cr-row.is-selected .cr-col-est {
+    display: grid;
+  }
+  .cr-table tbody tr.cr-row.is-selected .cr-col-est {
+    padding-bottom: 12px;
+  }
+  .cr-mobile-field-label {
+    display: block;
+    justify-self: start;
+    text-align: left;
+    white-space: nowrap;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--pkt-gray-500);
+  }
+  .cr-col-price > span:last-child,
+  .cr-est-val,
+  .cr-stepper {
+    justify-self: end;
+    text-align: right;
+  }
+  .cr-est-val {
+    font-variant-numeric: tabular-nums;
+  }
+  .cr-stepper {
+    min-width: 0;
+    margin-left: 0;
+    justify-content: flex-end;
+    gap: 4px;
+  }
+  .cr-stepper__btn {
+    min-width: 24px;
+    height: 34px;
+    font-size: 22px;
+  }
+  .cr-stepper__field {
+    width: 80px;
+    min-width: 80px;
+    height: 34px;
+  }
+  .cr-row-select input { width: 16px; height: 16px; }
+  .cr-table tbody td.cr-empty {
+    display: block;
+    border: none;
+    border-radius: 14px;
+    background: #fff;
+  }
+  .cr-table tfoot tr,
+  .cr-table tfoot td { display: block; width: 100%; }
+  .cr-table tfoot td {
+    margin-top: 4px;
+    border-radius: 10px;
+    text-align: left;
+    line-height: 1.7;
+  }
+  .cr-summary {
+    min-width: 0;
+    width: 100%;
+    table-layout: fixed;
+    font-size: 13px;
+  }
+  .cr-summary th, .cr-summary td { padding: 8px 4px; word-break: break-word; }
+
+  .pkt-modal.is-open:not(.pkt-modal--notice) {
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+  .pkt-modal:not(.pkt-modal--notice) .pkt-modal__dialog {
+    width: min(720px, calc(100vw - 32px));
+    max-height: min(86vh, 860px);
+    overflow: auto;
+    border-radius: 10px;
+  }
+  .pkt-modal--notice.is-open {
+    padding: 72px 12px 12px;
+    align-items: flex-start;
+  }
+  .pkt-modal--notice .pkt-modal__actions {
+    flex-direction: column-reverse;
+  }
+  .pkt-modal--notice .pkt-modal__btn,
+  .pkt-modal__actions .pkt-modal__btn {
+    min-height: var(--touch);
+  }
+  .pkt-toast {
+    top: calc(var(--header-h) + 12px);
+    left: 16px;
+    right: 16px;
+    transform: none;
+    text-align: center;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cr-btn-search { transition: none; }
+}
+
+.demo-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 300;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+  padding: 10px 40px;
+  background: #1F2937;
+  color: #F9FAFB;
+  font-size: 13px;
+  pointer-events: auto;
+}
+.demo-bar label { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.demo-bar select, .demo-bar button {
+  height: 30px;
+  border-radius: 6px;
+  border: 1px solid #4B5563;
+  background: #111827;
+  color: #F9FAFB;
+  font-size: 13px;
+  padding: 0 10px;
+  pointer-events: auto;
+  position: relative;
+  z-index: 1;
+}
+.demo-bar button {
+  background: var(--pkt-red-main);
+  border-color: var(--pkt-red-main);
+  cursor: pointer;
+  font-weight: 600;
+}
+.demo-bar button:hover { background: var(--pkt-red-hover); }
+.demo-bar__hint { color: #9CA3AF; }
+body.has-demo-bar {
+  padding-top: var(--demo-bar-h, 50px);
+}
+body.has-demo-bar .pkt-header { top: var(--demo-bar-h, 50px); }
+  </style>
+</head>
+<body class="has-demo-bar">
+  <div class="demo-bar" id="demo-bar" role="region" aria-label="Demo 提示控制">
+    <strong>Demo 控制</strong>
+    <label>進場提示
+      <select id="demo-notice">
+        <option value="convert">可辦理（確認）</option>
+        <option value="credit">未開信用戶</option>
+        <option value="quota">融資額度不足</option>
+        <option value="none">不跳出</option>
+      </select>
+    </label>
+    <label>送出結果
+      <select id="demo-submit">
+        <option value="success">成功</option>
+        <option value="source">配額不足</option>
+        <option value="stop">停資提示（00005）</option>
+      </select>
+    </label>
+    <button type="button" id="demo-trigger-notice">立即跳出提示</button>
+    <button type="button" id="demo-apply">寫入網址並重載</button>
+    <span class="demo-bar__hint">切換下拉即生效；不隨機。亦可 ?notice= / ?submit=</span>
+  </div>
+  <header class="pkt-header">
+    <button type="button" class="pkt-mobile-menu" aria-label="開啟選單">☰</button>
+    <a href="#" class="pkt-brand" aria-label="口袋證券">
+      <svg class="pkt-shield" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path fill="currentColor" d="M30.64.06c-.18-.03-.51-.08-.88-.05a4.93 4.93 0 0 0-4.7 4.92v10.07c0 .51-.04 1.02-.11 1.52A9.4 9.4 0 0 1 22.55 21.66c-.22.25-.46.5-.77.78a9.7 9.7 0 0 1-1.77 1.3 10.9 10.9 0 0 1-5 1.34h-.1a10.8 10.8 0 0 1-3.82-.79c-.39-.16-.77-.35-1.12-.55a9.6 9.6 0 0 1-1.24-.85 9.6 9.6 0 0 1-1.3-1.23 9.7 9.7 0 0 1-2.51-6.66V8.13a3.2 3.2 0 0 1 3.16-3.21h17.03V3.19A3.2 3.2 0 0 0 21.92 0H6.38C6.05 0 5.74.02 5.42.07A6.4 6.4 0 0 0 .07 5.42 6.4 6.4 0 0 0 0 6.38v8.66c0 3.62 1.29 6.95 3.43 9.54a14.2 14.2 0 0 0 1.99 2 14 14 0 0 0 .92.76c.04.03.08.06.12.08.26.19.53.36.8.52l.16.1c.27.16.55.32.84.47l.13.06a15.2 15.2 0 0 0 7.57 1.42 14.6 14.6 0 0 0 13.74-12.04V2.94S29.89.93 30.65.1c.02-.01.02-.04 0-.05Z"/>
+      </svg>
+      <span class="pkt-brand-text">口袋證券</span>
+    </a>
+    <button type="button" class="pkt-mobile-logout">登出</button>
+  </header>
+
+  <main class="pkt-main">
+    <h1 class="pkt-page-title">下單改類申請</h1>
+
+    <div class="cr-tabs" role="tablist">
+      <a class="cr-tab is-active" href="改類申請.html" aria-current="page">改類申請</a>
+      <a class="cr-tab" href="申請紀錄.html">申請紀錄</a>
+    </div>
+
+    <div class="pkt-panel" id="apply-panel">
+      <form class="cr-toolbar" id="query-form">
+        <span class="cr-field-label">證券帳號</span>
+        <input class="cr-account" id="account" value="陳小傑 6620-0385361" aria-label="證券帳號" readonly tabindex="-1" />
+        <div class="cr-search">
+          <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="7" cy="7" r="5.25" stroke="currentColor" stroke-width="1.5"/><path d="M11 11l3.2 3.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          <input type="search" id="stock-query" placeholder="輸入股票代號" />
+        </div>
+        <button type="submit" class="cr-btn-search">搜尋</button>
+      </form>
+
+      <div class="cr-table-shell" id="table-shell">
+        <div class="cr-table-wrap" id="table-wrap">
+          <table class="cr-table">
+            <thead id="thead">
+              <tr>
+                <th class="cr-col-name">
+                  <span class="cr-th-name">
+                    <label class="cr-row-select" aria-label="全選股票"><input type="checkbox" class="cr-row-select__input" id="row-select-all" /></label>
+                    <button type="button" class="cr-sort" data-sort="name">股票名稱 <span class="cr-sort__arrows"><span data-dir="asc">▲</span><span data-dir="desc">▼</span></span></button>
+                  </span>
+                </th>
+                <th class="cr-col-price"><button type="button" class="cr-sort" data-sort="price">單價 <span class="cr-sort__arrows"><span data-dir="asc">▲</span><span data-dir="desc">▼</span></span></button></th>
+                <th class="cr-col-lots"><button type="button" class="cr-sort" data-sort="lots">可改類張數 <span class="cr-sort__arrows"><span data-dir="asc">▲</span><span data-dir="desc">▼</span></span></button></th>
+                <th class="cr-col-convert">改資買張數</th>
+                <th class="cr-col-est">預估融資金額</th>
+              </tr>
+            </thead>
+            <tbody id="tbody"></tbody>
+            <tfoot id="tfoot"></tfoot>
+          </table>
+        </div>
+      </div>
+
+      <div class="cr-footer">
+        <button type="button" class="cr-btn-next" id="btn-next" disabled>下一步：送出</button>
+      </div>
+    </div>
+  </main>
+
+  <div class="pkt-modal pkt-modal--notice" id="notice-modal" aria-hidden="true">
+    <button type="button" class="pkt-modal__backdrop" id="notice-backdrop" tabindex="-1" aria-hidden="true"></button>
+    <div class="pkt-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="notice-title">
+      <button type="button" class="pkt-modal__close" id="notice-close" aria-label="關閉">×</button>
+      <p class="pkt-modal__title" id="notice-title">提示</p>
+      <div class="pkt-modal__body" id="notice-body"></div>
+      <div class="pkt-modal__actions">
+        <button type="button" class="pkt-modal__btn pkt-modal__btn--cancel" id="notice-cancel">取消</button>
+        <button type="button" class="pkt-modal__btn pkt-modal__btn--submit" id="notice-ok">前往變更</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="pkt-modal" id="confirm-modal" aria-hidden="true">
+    <button type="button" class="pkt-modal__backdrop" id="confirm-backdrop" tabindex="-1" aria-hidden="true"></button>
+    <div class="pkt-modal__dialog" role="dialog" aria-modal="true">
+      <p class="pkt-modal__title">確認改類</p>
+      <div class="pkt-modal__body">
+        <table class="cr-summary">
+          <thead>
+            <tr>
+              <th><span class="cr-label-full">股票名稱</span><span class="cr-label-short">標的</span></th>
+              <th><span class="cr-label-full">可改類張數</span><span class="cr-label-short">可改</span></th>
+              <th><span class="cr-label-full">改資買張數</span><span class="cr-label-short">改資買</span></th>
+              <th><span class="cr-label-full">預估融資金額</span><span class="cr-label-short">預估融資</span></th>
+            </tr>
+          </thead>
+          <tbody id="confirm-body"></tbody>
+          <tfoot>
+            <tr>
+              <td colspan="4" id="confirm-total"></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      <div class="pkt-modal__actions">
+        <button type="button" class="pkt-modal__btn pkt-modal__btn--cancel" id="confirm-cancel">取消</button>
+        <button type="button" class="pkt-modal__btn pkt-modal__btn--submit" id="confirm-submit">送出申請</button>
+      </div>
+    </div>
+  </div>
+  <div class="pkt-toast" id="toast">改類申請已送出</div>
+
+  <script>
+(function () {
+  var STORAGE_KEY = 'pkt-reclass-records-v2';
+  var SEED_RECORDS = [
+    { id: 'R1', date: '2026/08/27', code: '2330',  name: '台積電',         price: 1085,  lots: 2, convert: 1, status: 'approved' },
+    { id: 'R2', date: '2026/08/26', code: '00712', name: '復華富時不動產', price: 22.15, lots: 5, convert: 3, status: 'source' },
+    { id: 'R3', date: '2026/08/25', code: '2317',  name: '鴻海',           price: 214.5, lots: 12, convert: 4, status: 'other' }
+  ];
+  var APPLY_ROWS = [
+    { id: 'M1', code: '00712', name: '復華富時不動產', lots: 5,  price: 22.15 },
+    { id: 'M2', code: '00687B', name: '國泰20年美債',   lots: 10, price: 32.08 },
+    { id: 'M3', code: '00712', name: '復華富時不動產', lots: 8,  price: 21.90 },
+    { id: 'M4', code: '00687B', name: '國泰20年美債',   lots: 3,  price: 31.96 },
+    { id: 'M5', code: '2330',  name: '台積電',         lots: 2,  price: 1085 },
+    { id: 'M6', code: '2317',  name: '鴻海',           lots: 12, price: 214.5 }
+  ];
+
+  var keyword = '';
+  var sortKey = 'name';
+  var sortDir = 'asc';
+  var convertQty = {};
+  var pageLocked = false;
+  var submitting = false;
+  var CLIENT_MARGIN_LIMIT = 2000000;
+  var SHARES_PER_LOT = 1000;
+  var CREDIT_OPEN_URL = '#';
+  var QUOTA_APPLY_URL = '#';
+  var PORTAL_URL = 'https://www.pocket.tw/';
+  var MARGIN_BALANCE = (function () {
+    var q = new URLSearchParams(window.location.search).get('balance');
+    var n = q == null || q === '' ? 12800 : Number(q);
+    return isNaN(n) ? 12800 : n;
+  })();
+  var NOTICE_TYPES = ['credit', 'quota', 'convert', 'none'];
+  var NOTICE_TYPE = (function () {
+    var q = new URLSearchParams(window.location.search).get('notice');
+    if (NOTICE_TYPES.indexOf(q) !== -1) return q;
+    return 'convert';
+  })();
+  var SUBMIT_TYPES = ['success', 'source', 'stop'];
+  var SUBMIT_TYPE = (function () {
+    var q = new URLSearchParams(window.location.search);
+    var submit = q.get('submit');
+    if (SUBMIT_TYPES.indexOf(submit) !== -1) return submit;
+    var err = q.get('err') || q.get('code');
+    if (err === '00005') return 'stop';
+    return 'success';
+  })();
+  var activeNotice = NOTICE_TYPE;
+
+  var tbody = document.getElementById('tbody');
+  var tfoot = document.getElementById('tfoot');
+  var thead = document.getElementById('thead');
+  var btnNext = document.getElementById('btn-next');
+  var notice = document.getElementById('notice-modal');
+  var noticeBody = document.getElementById('notice-body');
+  var noticeOk = document.getElementById('notice-ok');
+  var noticeCancel = document.getElementById('notice-cancel');
+  var noticeClose = document.getElementById('notice-close');
+  var noticeTitle = document.getElementById('notice-title');
+  var RECORDS_URL = '申請紀錄.html';
+  var applyPanel = document.getElementById('apply-panel');
+  var stockQuery = document.getElementById('stock-query');
+  var btnSearch = document.querySelector('.cr-btn-search');
+  var modal = document.getElementById('confirm-modal');
+  var confirmBody = document.getElementById('confirm-body');
+  var toast = document.getElementById('toast');
+
+  function formatPrice(n) {
+    return Number(n).toLocaleString('zh-TW', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+  function formatMoney(n) {
+    return Number(n).toLocaleString('zh-TW');
+  }
+  function estimateAmount(r) {
+    return r.price * getQty(r.id) * SHARES_PER_LOT;
+  }
+  function totalEstimate() {
+    var sum = 0;
+    APPLY_ROWS.forEach(function (r) { sum += estimateAmount(r); });
+    return sum;
+  }
+  function findRow(id) {
+    for (var i = 0; i < APPLY_ROWS.length; i++) {
+      if (APPLY_ROWS[i].id === id) return APPLY_ROWS[i];
+    }
+    return null;
+  }
+  function remainingQuota() {
+    return CLIENT_MARGIN_LIMIT - Math.round(totalEstimate());
+  }
+  function renderTotals() {
+    var total = Math.round(totalEstimate());
+    var remain = remainingQuota();
+    var remainClass = remain < 0 ? 'cr-num-warn' : 'cr-num-red';
+    tfoot.innerHTML =
+      '<tr' + (remain < 0 ? ' class="is-over"' : '') + '><td colspan="5">本次預估融資 <span class="cr-num-red">' + formatMoney(total) +
+      '</span> 元，申請後剩餘額度 <span class="' + remainClass + '">' + formatMoney(remain) +
+      '</span> 元</td></tr>';
+  }
+  function applyPageLock() {
+    applyPanel.classList.toggle('is-locked', pageLocked);
+    stockQuery.disabled = pageLocked;
+    btnSearch.disabled = pageLocked;
+    render();
+  }
+  function lockAfterBlockingNotice() {
+    if (activeNotice !== 'credit' && activeNotice !== 'quota') return;
+    pageLocked = true;
+    applyPageLock();
+  }
+  function getQty(id) {
+    return convertQty[id] == null ? 0 : convertQty[id];
+  }
+  function clampQty(id, value, max) {
+    var n = parseInt(String(value).replace(/[^\d]/g, ''), 10);
+    if (isNaN(n) || n < 0) n = 0;
+    if (n > max) n = max;
+    convertQty[id] = n;
+    return n;
+  }
+  function matchKeyword(r) {
+    if (!keyword) return true;
+    var q = keyword.toLowerCase();
+    return r.code.toLowerCase().indexOf(q) !== -1 || r.name.indexOf(keyword) !== -1;
+  }
+  function currentRows() {
+    var list = APPLY_ROWS.filter(matchKeyword);
+    list.sort(function (a, b) {
+      var cmp;
+      if (sortKey === 'name') cmp = (a.code + a.name).localeCompare(b.code + b.name, 'zh-Hant');
+      else cmp = a[sortKey] - b[sortKey];
+      return sortDir === 'asc' ? cmp : -cmp;
+    });
+    return list;
+  }
+  function readyItems() {
+    return APPLY_ROWS.filter(function (r) { return getQty(r.id) > 0; });
+  }
+  function syncNext() {
+    btnNext.disabled = pageLocked || submitting || readyItems().length === 0;
+  }
+  function loadRecords() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) return JSON.parse(raw);
+    } catch (e) {}
+    return SEED_RECORDS.slice();
+  }
+  function saveRecords(list) {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(list)); } catch (e) {}
+  }
+
+  var selectedIds = {};
+  var rowSelectAll = document.getElementById('row-select-all');
+
+  function isRowSelected(id) {
+    return !!selectedIds[id] && !pageLocked;
+  }
+
+  function syncSelectAllState() {
+    if (!rowSelectAll) return;
+    var rows = currentRows();
+    var selectedCount = rows.filter(function (r) { return isRowSelected(r.id); }).length;
+    rowSelectAll.checked = rows.length > 0 && selectedCount === rows.length;
+    rowSelectAll.indeterminate = selectedCount > 0 && selectedCount < rows.length;
+    rowSelectAll.disabled = pageLocked;
+  }
+
+  function stepperHtml(r) {
+    var qty = getQty(r.id);
+    var selected = isRowSelected(r.id);
+    var canEdit = selected && !pageLocked;
+    var disabled = canEdit ? '' : 'disabled';
+    var decOff = !canEdit || qty <= 0 ? 'disabled' : '';
+    var incOff = !canEdit || qty >= r.lots ? 'disabled' : '';
+    return (
+      '<div class="cr-stepper" data-stepper="' + r.id + '" data-max="' + r.lots + '">' +
+        '<button type="button" class="cr-stepper__btn" data-step="-1" ' + decOff + ' aria-label="減少 1 張">−</button>' +
+        '<span class="cr-stepper__field">' +
+          '<input type="text" inputmode="numeric" class="cr-stepper__input" value="' + qty + '" ' + disabled + ' aria-label="改資買張數" />' +
+          '<span class="cr-stepper__unit">張</span>' +
+        '</span>' +
+        '<button type="button" class="cr-stepper__btn" data-step="1" ' + incOff + ' aria-label="增加 1 張">+</button>' +
+      '</div>'
+    );
+  }
+
+  function render() {
+    thead.querySelectorAll('.cr-sort').forEach(function (btn) {
+      var key = btn.getAttribute('data-sort');
+      btn.querySelectorAll('[data-dir]').forEach(function (arrow) {
+        arrow.classList.toggle('is-on', key === sortKey && arrow.getAttribute('data-dir') === sortDir);
+      });
+    });
+    var rows = currentRows();
+    if (!rows.length) {
+      tbody.innerHTML = '<tr><td class="cr-empty" colspan="5">查無符合的資料</td></tr>';
+      renderTotals();
+      syncNext();
+      syncSelectAllState();
+      return;
+    }
+    tbody.innerHTML = rows.map(function (r, i) {
+      var selected = isRowSelected(r.id);
+      var stripe = i % 2 === 0 ? 'row-gray' : 'row-pink';
+      return (
+        '<tr class="cr-row ' + stripe + (selected ? ' is-selected' : '') + '" data-id="' + r.id + '">' +
+          '<td class="cr-col-name cr-name-cell">' +
+            '<label class="cr-row-select" aria-label="選擇 ' + r.code + ' ' + r.name + '">' +
+              '<input type="checkbox" class="cr-row-select__input" data-select="' + r.id + '"' + (selected ? ' checked' : '') + (pageLocked ? ' disabled' : '') + ' />' +
+            '</label>' +
+            '<span>' + r.code + ' ' + r.name + '</span>' +
+          '</td>' +
+          '<td class="cr-col-price"><span class="cr-mobile-field-label">單價</span><span>' + formatPrice(r.price) + '</span></td>' +
+          '<td class="cr-col-lots">' + r.lots.toLocaleString('zh-TW') + '<span class="cr-unit"> 張</span></td>' +
+          '<td class="cr-col-convert"><span class="cr-mobile-field-label">改資買張數</span>' + stepperHtml(r) + '</td>' +
+          '<td class="cr-col-est cr-est" data-est="' + r.id + '"><span class="cr-mobile-field-label">預估融資金額</span><span class="cr-est-val">' + formatMoney(Math.round(estimateAmount(r))) + '</span></td>' +
+        '</tr>'
+      );
+    }).join('');
+    renderTotals();
+    syncNext();
+    syncSelectAllState();
+    syncTableScrollHint();
+  }
+
+  function updateStepper(wrap) {
+    if (pageLocked) return;
+    var id = wrap.getAttribute('data-stepper');
+    if (!isRowSelected(id)) return;
+    var max = parseInt(wrap.getAttribute('data-max'), 10);
+    var qty = clampQty(id, wrap.querySelector('.cr-stepper__input').value, max);
+    wrap.querySelector('.cr-stepper__input').value = String(qty);
+    wrap.querySelector('[data-step="-1"]').disabled = qty <= 0;
+    wrap.querySelector('[data-step="1"]').disabled = qty >= max;
+    var row = findRow(id);
+    var est = wrap.closest('tr').querySelector('[data-est]');
+    if (row && est) {
+      var val = est.querySelector('.cr-est-val');
+      var text = formatMoney(Math.round(estimateAmount(row)));
+      if (val) val.textContent = text;
+      else est.textContent = text;
+    }
+    renderTotals();
+    syncNext();
+  }
+
+  function setRowSelected(id, selected) {
+    if (pageLocked) return;
+    if (selected) selectedIds[id] = true;
+    else {
+      delete selectedIds[id];
+      clampQty(id, 0, (findRow(id) || {}).lots || 0);
+    }
+    render();
+  }
+
+  tbody.addEventListener('change', function (e) {
+    if (pageLocked) return;
+    var box = e.target.closest('[data-select]');
+    if (box) {
+      setRowSelected(box.getAttribute('data-select'), box.checked);
+      return;
+    }
+    var wrap = e.target.closest('[data-stepper]');
+    if (wrap) updateStepper(wrap);
+  });
+  tbody.addEventListener('input', function (e) {
+    if (pageLocked) return;
+    var wrap = e.target.closest('[data-stepper]');
+    if (wrap) updateStepper(wrap);
+  });
+  tbody.addEventListener('click', function (e) {
+    if (pageLocked) return;
+    var btn = e.target.closest('[data-step]');
+    if (!btn || btn.disabled) return;
+    var wrap = btn.closest('[data-stepper]');
+    var input = wrap.querySelector('.cr-stepper__input');
+    var max = parseInt(wrap.getAttribute('data-max'), 10);
+    var id = wrap.getAttribute('data-stepper');
+    if (!isRowSelected(id)) return;
+    clampQty(id, getQty(id) + parseInt(btn.getAttribute('data-step'), 10), max);
+    input.value = String(getQty(id));
+    updateStepper(wrap);
+  });
+  if (rowSelectAll) {
+    rowSelectAll.addEventListener('change', function () {
+      if (pageLocked) return;
+      currentRows().forEach(function (r) {
+        if (rowSelectAll.checked) selectedIds[r.id] = true;
+        else {
+          delete selectedIds[r.id];
+          clampQty(r.id, 0, r.lots);
+        }
+      });
+      render();
+    });
+  }
+
+  thead.addEventListener('click', function (e) {
+    if (pageLocked) return;
+    var btn = e.target.closest('.cr-sort');
+    if (!btn) return;
+    var key = btn.getAttribute('data-sort');
+    if (sortKey === key) sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+    else { sortKey = key; sortDir = 'asc'; }
+    render();
+  });
+
+  document.getElementById('query-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (pageLocked) return;
+    keyword = document.getElementById('stock-query').value.trim();
+    render();
+  });
+
+  function openModal() {
+    if (pageLocked) return;
+    var items = readyItems();
+    if (!items.length) return;
+    confirmBody.innerHTML = items.map(function (r) {
+      var qty = getQty(r.id);
+      return '<tr><td>' + r.code + ' ' + r.name + '</td><td>' + r.lots + '</td><td>' + qty + '</td><td>' + formatMoney(Math.round(estimateAmount(r))) + '</td></tr>';
+    }).join('');
+    var confirmTotal = 0;
+    items.forEach(function (r) { confirmTotal += estimateAmount(r); });
+    document.getElementById('confirm-total').innerHTML =
+      '本次預估融資 <span class="cr-num-red">' + formatMoney(Math.round(confirmTotal)) + '</span> 元';
+    modal.classList.add('is-open');
+    modal.setAttribute('aria-hidden', 'false');
+  }
+  function closeModal() {
+    modal.classList.remove('is-open');
+    modal.setAttribute('aria-hidden', 'true');
+  }
+  function closeNotice() {
+    notice.classList.remove('is-open', 'is-convert');
+    notice.setAttribute('aria-hidden', 'true');
+  }
+  function isBlockingNotice() {
+    return activeNotice === 'credit' || activeNotice === 'quota';
+  }
+  function setNoticeCancelVisible(show) {
+    notice.classList.toggle('is-single', !show);
+    noticeCancel.hidden = !show;
+  }
+  function showSourceNotice(shortageItems) {
+    activeNotice = 'source';
+    notice.classList.remove('is-convert');
+    setNoticeCancelVisible(true);
+    noticeCancel.textContent = '取消';
+    noticeTitle.textContent = '提示';
+    var names = (shortageItems || []).map(function (r) {
+      return r.code + ' ' + r.name;
+    });
+    var unique = names.filter(function (n, i) { return names.indexOf(n) === i; });
+    var stockText = unique.length ? unique.join('、') : '（標的未指定）';
+    noticeBody.innerHTML =
+      '<p class="pkt-modal__notice pkt-modal__notice--alert">配額不足標的：' + stockText + '</p>' +
+      '<p class="pkt-modal__notice">若有問題，請於服務時間致電客服：<a href="tel:0809-089-001">0809-089-001</a></p>';
+    noticeOk.textContent = '我知道了';
+    notice.classList.add('is-open');
+    notice.setAttribute('aria-hidden', 'false');
+  }
+  var STOP_MARGIN_CODE = '00005';
+  function getSubmitScenario() {
+    return SUBMIT_TYPE;
+  }
+  function syncDemoParamsToUrl() {
+    var next = new URLSearchParams(window.location.search);
+    next.set('notice', NOTICE_TYPE);
+    next.set('submit', SUBMIT_TYPE);
+    var qs = next.toString();
+    var url = window.location.pathname + (qs ? '?' + qs : '') + (window.location.hash || '');
+    window.history.replaceState(null, '', url);
+  }
+  function showStopMarginNotice(items) {
+    activeNotice = 'stop';
+    notice.classList.remove('is-convert');
+    setNoticeCancelVisible(false);
+    noticeCancel.textContent = '取消';
+    noticeTitle.textContent = '停資提示';
+    noticeBody.innerHTML = (items || []).map(function (r) {
+      return (
+        '<p class="pkt-modal__notice pkt-modal__notice--alert">標的：' + r.code + ' ' + r.name +
+        '，此證券停止融資買進</p>' +
+        '<p class="pkt-modal__notice">若有問題，請於上班時間致電客服 ' +
+        '<a href="tel:0809-089-001">0809-089-001</a></p>'
+      );
+    }).join('');
+    noticeOk.textContent = '我知道了';
+    notice.classList.add('is-open');
+    notice.setAttribute('aria-hidden', 'false');
+  }
+  function isStockShortage() {
+    return getSubmitScenario() === 'source';
+  }
+  function isStopMargin() {
+    return getSubmitScenario() === 'stop';
+  }
+  function showQuotaNotice(balance) {
+    var amt = balance == null ? MARGIN_BALANCE : balance;
+    activeNotice = 'quota';
+    notice.classList.remove('is-convert');
+    setNoticeCancelVisible(true);
+    noticeCancel.textContent = '查看紀錄';
+    noticeTitle.textContent = '融資額度不足';
+    noticeBody.innerHTML =
+      '<p class="pkt-modal__notice">您現在融資餘額為 ' + formatMoney(amt) + ' 元，請調整改資買張數，或前往額度申請提高融資額度</p>' +
+      '<p class="pkt-modal__notice pkt-modal__notice--alert">線上額度申請僅限第一類帳戶及第二類帳戶，調整額度需經過元大證金審核，預計審核日為兩個工作天</p>';
+    noticeOk.textContent = '前往額度申請';
+    notice.classList.add('is-open');
+    notice.setAttribute('aria-hidden', 'false');
+  }
+  function dismissBlockingNotice() {
+    lockAfterBlockingNotice();
+    closeNotice();
+  }
+  function openEntryNotice() {
+    activeNotice = NOTICE_TYPE;
+    if (NOTICE_TYPE === 'none') return;
+    if (NOTICE_TYPE === 'credit') {
+      notice.classList.remove('is-convert');
+      setNoticeCancelVisible(true);
+      noticeCancel.textContent = '取消';
+      noticeTitle.textContent = '提示';
+      noticeBody.innerHTML =
+        '<p class="pkt-modal__notice">您尚未開立信用戶，請您前往開立信用戶</p>' +
+        '<p class="pkt-modal__notice pkt-modal__notice--alert">信用戶開戶需經審核，預計審核日為兩個工作天</p>';
+      noticeOk.textContent = '前往信用戶開戶';
+    } else if (NOTICE_TYPE === 'quota') {
+      showQuotaNotice(MARGIN_BALANCE);
+      return;
+    } else {
+      setNoticeCancelVisible(false);
+      noticeCancel.textContent = '取消';
+      notice.classList.add('is-convert');
+      noticeTitle.textContent = '提示';
+      noticeBody.innerHTML =
+        '<p class="pkt-modal__notice pkt-modal__notice--alert">目前僅支援將「現股買進」變更為「融資買進」。</p>' +
+        '<p class="pkt-modal__notice">變更前請確認您已開通信用交易資格，且融資額度足夠。</p>' +
+        '<p class="pkt-modal__notice">變更後系統將檢核該檔股票的融資配額，若配額不足，請洽客服中心 <a href="tel:0809-089-001">0809-089-001</a> 詢問。</p>' +
+        '<p class="pkt-modal__notice">是否確認辦理交易類別變更？</p>';
+      noticeOk.textContent = '確認';
+    }
+    notice.classList.add('is-open');
+    notice.setAttribute('aria-hidden', 'false');
+  }
+
+  btnNext.addEventListener('click', openModal);
+  function goPortal() {
+    window.location.href = PORTAL_URL;
+  }
+  document.getElementById('confirm-cancel').addEventListener('click', closeModal);
+  document.getElementById('confirm-backdrop').addEventListener('click', function (e) {
+    e.preventDefault();
+  });
+  function goExternal(url) {
+    if (!url || url === '#') {
+      lockAfterBlockingNotice();
+      closeNotice();
+      return;
+    }
+    window.location.href = url;
+  }
+  document.getElementById('notice-ok').addEventListener('click', function () {
+    if (activeNotice === 'credit') { goExternal(CREDIT_OPEN_URL); return; }
+    if (activeNotice === 'quota') { goExternal(QUOTA_APPLY_URL); return; }
+    closeNotice();
+  });
+  document.getElementById('notice-cancel').addEventListener('click', function () {
+    if (activeNotice === 'quota') {
+      window.location.href = RECORDS_URL;
+      return;
+    }
+    if (isBlockingNotice()) {
+      goPortal();
+      return;
+    }
+    closeNotice();
+  });
+  noticeClose.addEventListener('click', function () {
+    if (isBlockingNotice()) {
+      dismissBlockingNotice();
+      return;
+    }
+    closeNotice();
+  });
+  document.getElementById('notice-backdrop').addEventListener('click', function (e) {
+    e.preventDefault();
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') return;
+    if (modal.classList.contains('is-open')) {
+      closeModal();
+      return;
+    }
+    if (!notice.classList.contains('is-open')) return;
+    if (isBlockingNotice()) dismissBlockingNotice();
+    else closeNotice();
+  });
+  function todayText() {
+    var d = new Date();
+    var m = d.getMonth() + 1;
+    var day = d.getDate();
+    return d.getFullYear() + '/' + (m < 10 ? '0' : '') + m + '/' + (day < 10 ? '0' : '') + day;
+  }
+  function appendRecords(items, status) {
+    var records = loadRecords();
+    var stamp = Date.now();
+    items.forEach(function (r, i) {
+      records.unshift({
+        id: 'R' + stamp + '-' + r.id + '-' + i,
+        date: todayText(),
+        code: r.code,
+        name: r.name,
+        price: r.price,
+        lots: r.lots,
+        convert: getQty(r.id),
+        status: status
+      });
+    });
+    saveRecords(records);
+  }
+  document.getElementById('confirm-submit').addEventListener('click', function () {
+    if (submitting || pageLocked) return;
+    var items = readyItems();
+    if (!items.length) { closeModal(); return; }
+    submitting = true;
+    syncNext();
+    closeModal();
+    if (isStopMargin()) {
+      showStopMarginNotice(items);
+      appendRecords(items, 'stop');
+      submitting = false;
+      syncNext();
+      return;
+    }
+    if (isStockShortage()) {
+      showSourceNotice(items);
+      appendRecords(items, 'source');
+      submitting = false;
+      syncNext();
+      return;
+    }
+    appendRecords(items, 'approved');
+    submitting = false;
+    convertQty = {};
+    toast.classList.add('is-visible');
+    window.setTimeout(function () { toast.classList.remove('is-visible'); }, 2400);
+    render();
+  });
+
+  function syncTableScrollHint() {
+    var shell = document.getElementById('table-shell');
+    var wrap = document.getElementById('table-wrap');
+    if (!shell || !wrap) return;
+    var canScroll = wrap.scrollWidth > wrap.clientWidth + 2;
+    var atEnd = wrap.scrollLeft + wrap.clientWidth >= wrap.scrollWidth - 2;
+    shell.classList.toggle('is-scrollable', canScroll && !atEnd);
+  }
+  var tableWrap = document.getElementById('table-wrap');
+  if (tableWrap) {
+    tableWrap.addEventListener('scroll', syncTableScrollHint, { passive: true });
+    window.addEventListener('resize', syncTableScrollHint);
+  }
+
+  (function initDemoBar() {
+    var noticeSel = document.getElementById('demo-notice');
+    var submitSel = document.getElementById('demo-submit');
+    var applyBtn = document.getElementById('demo-apply');
+    var triggerBtn = document.getElementById('demo-trigger-notice');
+    if (!noticeSel || !submitSel || !applyBtn) return;
+    noticeSel.value = NOTICE_TYPE;
+    submitSel.value = SUBMIT_TYPE;
+
+    function applyNoticeLive(value) {
+      NOTICE_TYPE = value;
+      pageLocked = false;
+      applyPageLock();
+      closeNotice();
+      closeModal();
+      if (value === 'none') {
+        syncDemoParamsToUrl();
+        return;
+      }
+      openEntryNotice();
+      syncDemoParamsToUrl();
+    }
+
+    noticeSel.addEventListener('change', function () {
+      applyNoticeLive(noticeSel.value);
+    });
+    submitSel.addEventListener('change', function () {
+      SUBMIT_TYPE = submitSel.value;
+      syncDemoParamsToUrl();
+    });
+    if (triggerBtn) {
+      triggerBtn.addEventListener('click', function () {
+        applyNoticeLive(noticeSel.value);
+      });
+    }
+    applyBtn.addEventListener('click', function () {
+      var next = new URLSearchParams(window.location.search);
+      next.set('notice', noticeSel.value);
+      next.set('submit', submitSel.value);
+      window.location.href = window.location.pathname + '?' + next.toString() + (window.location.hash || '');
+    });
+    var bar = document.getElementById('demo-bar');
+    if (bar) {
+      document.documentElement.style.setProperty('--demo-bar-h', bar.offsetHeight + 'px');
+    }
+    syncDemoParamsToUrl();
+  })();
+
+  render();
+  openEntryNotice();
+})();
+  </script>
+</body>
+</html>
